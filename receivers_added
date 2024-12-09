@@ -14,18 +14,19 @@ phased_arrays = [
         "position": [0, 0],  # Center of the array
         "radius": None,  # Only for curved arrays
         "arc_angle": None,  # Only for curved arrays
-    },
-    {
-        "type": "curved",
-        "num_elements": 5,
-        "element_spacing": None,  # Not used for curved arrays
-        "frequencies": [0.8, 1.2],
-        "wavelengths": [1.25, 1.0],
-        "steering_angle": -15,  # Degrees
-        "position": [1.5, 1.0],  # Center of the array
-        "radius": 1.0,
-        "arc_angle": 120,  # Degrees
     }
+    # ,
+    # {
+    #     "type": "curved",
+    #     "num_elements": 5,
+    #     "element_spacing": None,  # Not used for curved arrays
+    #     "frequencies": [0.8, 1.2],
+    #     "wavelengths": [1.25, 1.0],
+    #     "steering_angle": -15,  # Degrees
+    #     "position": [1.5, 1.0],  # Center of the array
+    #     "radius": 1.0,
+    #     "arc_angle": 120,  # Degrees
+    # }
 ]
 
 # Receiver positions
@@ -37,8 +38,8 @@ receivers = [
 ]
 
 # Define grid for visualization
-x = np.linspace(-3, 3, 500)  # X-axis (horizontal distance)
-y = np.linspace(-3, 3, 500)  # Y-axis (vertical distance)
+x = np.linspace(-10, 10, 500)  # X-axis (horizontal distance)
+y = np.linspace(-10, 10, 500)  # Y-axis (vertical distance)
 X, Y = np.meshgrid(x, y)  # Create a 2D grid
 
 # Calculate distances and phase shifts for each array

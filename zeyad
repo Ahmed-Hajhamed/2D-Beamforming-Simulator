@@ -1,0 +1,114 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+c = 343  # Speed of sound in air (m/s)
+frequency = 1000  # Signal frequency in Hz
+wavelength = c / frequency  # Wavelength of the signal (m)
+k = 2 * np.pi / wavelength  # Wavenumber
+array_size = 8  # Number of elements in the array
+element_spacing = wavelength / 2  # Spacing between elements (lambda/2)
+steering_angle = np.radians(30)  # Steering angle in radians
+
+# Linear array geometry
+x_positions = np.linspace(0, (array_size - 1) * element_spacing, array_size)
+y_positions = np.zeros(array_size)  # All elements are on the x-axis
+array_positions = np.vstack((x_positions, y_positions)).T
+
+# Observation grid
+grid_size = 100  # Resolution of the grid
+x = np.linspace(-5, 5, grid_size)
+y = np.linspace(-5, 5, grid_size)
+X, Y = np.meshgrid(x, y)
+grid_positions = np.stack((X.flatten(), Y.flatten()), axis=-1)
+
+# Calculate delays and phase shifts for steering
+steering_vector = np.array([np.sin(steering_angle), np.cos(steering_angle)])
+delays = np.dot(array_positions, steering_vector) / c
+phase_shifts = -2 * np.pi * frequency * delays
+
+# Calculate interference pattern
+intensity = np.zeros(grid_positions.shape[0])
+for i, (x, y) in enumerate(array_positions):
+    distances = np.linalg.norm(grid_positions - np.array([x, y]), axis=1)
+    phases = k * distances + phase_shifts[i]
+    intensity += np.cos(phases)
+
+# Reshape intensity for visualization
+intensity_map = intensity.reshape(grid_size, grid_size)
+
+# Plotting the interference map
+plt.figure(figsize=(10, 8))
+plt.pcolormesh(X, Y, intensity_map, shading='auto', cmap='jet')
+plt.colorbar(label="Signal Intensity")
+plt.scatter(x_positions, y_positions, color='red', label='Array Elements')
+plt.title("Beamforming Interference Pattern (Linear Array)")
+plt.xlabel("X Position (m)")
+plt.ylabel("Y Position (m)")
+plt.legend()
+plt.axis('equal')
+plt.show()
+
+
+# Polar plot: Beam pattern computation
+
+# Define angular range for the polar plot (-90° to 90°)
+angles = np.linspace(-np.pi / 2, np.pi / 2, 360)  # Radians
+steering_vector = np.array([np.sin(angles), np.cos(angles)])
+
+# Compute the array factor (AF)
+array_factor = np.zeros_like(angles, dtype=np.complex128)
+for i, (x, y) in enumerate(array_positions):
+    positions = np.array([x, y])
+    delays = np.dot(positions, steering_vector) / c  # Time delay for each angle
+    phase_shifts = -2 * np.pi * frequency * delays
+    array_factor += np.exp(1j * phase_shifts)  # Summing complex exponentials
+
+# Normalize array factor and compute intensity
+normalized_af = np.abs(array_factor) / np.max(np.abs(array_factor))
+
+# Polar plot
+plt.figure(figsize=(8, 8))
+ax = plt.subplot(111, polar=True)
+ax.plot(angles, normalized_af, label="Beam Pattern")
+ax.set_title("Polar Beam Pattern (Linear Array)", va='bottom')
+ax.set_theta_zero_location("N")  # Set 0° at the top
+ax.set_theta_direction(-1)  # Clockwise angle direction
+ax.set_rlabel_position(90)  # Radial labels at 90°
+ax.legend()
+plt.show()
+
+# Define curved array parameters
+radius = 2.0  # Radius of the arc (meters)
+angular_range = np.radians(120)  # Total angular range of the array (120 degrees)
+theta_min = -angular_range / 2  # Starting angle of the arc
+theta_max = angular_range / 2  # Ending angle of the arc
+
+# Position elements along the arc
+angles_arc = np.linspace(theta_min, theta_max, array_size)
+x_positions_curved = radius * np.cos(angles_arc)
+y_positions_curved = radius * np.sin(angles_arc)
+curved_array_positions = np.vstack((x_positions_curved, y_positions_curved)).T
+
+# Compute the array factor for the curved array
+array_factor_curved = np.zeros_like(angles, dtype=np.complex128)
+for i, (x, y) in enumerate(curved_array_positions):
+    positions = np.array([x, y])
+    delays = np.dot(positions, steering_vector) / c  # Time delay for each angle
+    phase_shifts = -2 * np.pi * frequency * delays
+    array_factor_curved += np.exp(1j * phase_shifts)  # Summing complex exponentials
+
+# Normalize array factor and compute intensity
+normalized_af_curved = np.abs(array_factor_curved) / np.max(np.abs(array_factor_curved))
+
+# Polar plot for the curved array
+plt.figure(figsize=(8, 8))
+ax = plt.subplot(111, polar=True)
+ax.plot(angles, normalized_af_curved, label="Beam Pattern (Curved Array)")
+ax.set_title("Polar Beam Pattern (Curved Array)", va='bottom')
+ax.set_theta_zero_location("N")  # Set 0° at the top
+ax.set_theta_direction(-1)  # Clockwise angle direction
+ax.set_rlabel_position(90)  # Radial labels at 90°
+ax.legend()
+plt.show()
+

@@ -34,6 +34,10 @@ x = np.linspace(-20, 20, 200)
 y = np.linspace(-20, 20, 200)
 X, Y = np.meshgrid(x, y)
 
+# Define beam profile line (along X-axis for simplicity)
+beam_profile_x = np.linspace(-20, 20, 500)
+beam_profile_y = np.zeros_like(beam_profile_x)
+
 # Precompute distances and phase shifts for each array
 arrays_data = []
 for array in phased_arrays:
@@ -61,8 +65,10 @@ for array in phased_arrays:
     distances = [
         np.sqrt((X - pos[0])**2 + (Y - pos[1])**2) for pos in source_positions
     ]
-    
-    # Phase shift calculation
+    beam_distances = [
+        np.sqrt((beam_profile_x - pos[0])**2 + (beam_profile_y - pos[1])**2)
+        for pos in source_positions
+    ]
     phase_shifts = [
         [
             2 * np.pi / wavelength * pos[0] * np.sin(steering_angle)
@@ -71,10 +77,10 @@ for array in phased_arrays:
         ]
         for pos in source_positions
     ]
-    
     arrays_data.append({
         "positions": source_positions,
         "distances": distances,
+        "beam_distances": beam_distances,
         "phase_shifts": phase_shifts,
         "frequencies": frequencies,
         "wavelengths": wavelengths,
@@ -82,7 +88,6 @@ for array in phased_arrays:
 
 # Initialize plot
 fig, (ax_wave, ax_arrays) = plt.subplots(1, 2, figsize=(18, 6))
-ax_polar = fig.add_subplot(133, projection='polar')  # Polar plot for beam profile
 
 # Configure wave plot
 contour = ax_wave.contourf(X, Y, np.zeros_like(X), levels=100, cmap='RdBu')
@@ -112,41 +117,27 @@ ax_arrays.legend()
 ax_arrays.grid(True)
 ax_arrays.axis('equal')
 
-# Configure polar beam plot
-ax_polar.set_title("Beam Profile (Polar)")
-ax_polar.set_theta_zero_location("N")
-ax_polar.set_theta_direction(-1)
 
 # Animation function
 def update(frame):
     time = frame / 10.0
     resultant_wave = np.zeros_like(X)
-    beam_profile_amplitude = np.zeros(500)  # Beam profile along angles
+    beam_profile_amplitude = np.zeros_like(beam_profile_x)
     receiver_signals = []
 
-    # Compute beam profile for polar plot
-    theta_vals = np.linspace(-np.pi/2, np.pi/2, 500)  # Angle range for polar plot
     for array_data in arrays_data:
         distances = array_data["distances"]
+        beam_distances = array_data["beam_distances"]
         phase_shifts = array_data["phase_shifts"]
         frequencies = array_data["frequencies"]
         wavelengths = array_data["wavelengths"]
 
-        for r, phi in zip(distances, phase_shifts):
+        for r, beam_r, phi in zip(distances, beam_distances, phase_shifts):
             for freq, wavelength in zip(frequencies, wavelengths):
                 k = 2 * np.pi / wavelength
                 omega = 2 * np.pi * freq
-                beam_profile_amplitude += np.sin(k * r - omega * time + phi[0])
-
-    # Update the beam profile plot (polar)
-    ax_polar.clear()
-    ax_polar.plot(theta_vals, beam_profile_amplitude, label="Beam Profile")
-    ax_polar.legend()
-
-    # Update wave field plot
-    for c in ax_wave.collections:
-        c.remove()
-    ax_wave.contourf(X, Y, resultant_wave, levels=100, cmap='RdBu')
+                resultant_wave += np.sin(k * r - omega * time + phi[wavelengths.index(wavelength)])
+                beam_profile_amplitude += np.sin(k * beam_r - omega * time + phi[wavelengths.index(wavelength)])
 
     # Update receiver signals
     for rx in receivers:
@@ -158,6 +149,11 @@ def update(frame):
 
     for i, text in enumerate(receiver_texts):
         text.set_text(f"{receiver_signals[i]:.2f}")
+
+    # Update plots
+    for c in ax_wave.collections:
+        c.remove()
+    ax_wave.contourf(X, Y, resultant_wave, levels=100, cmap='RdBu')
 
 # Create animation
 ani = FuncAnimation(fig, update, frames=100, interval=50)

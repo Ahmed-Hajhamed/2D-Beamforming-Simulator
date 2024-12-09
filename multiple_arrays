@@ -14,7 +14,8 @@ phased_arrays = [
         "position": [0, 0],  # Center of the array
         "radius": None,  # Only for curved arrays
         "arc_angle": None,  # Only for curved arrays
-    },
+    }
+    ,
     {
         "type": "curved",
         "num_elements": 5,
@@ -29,8 +30,8 @@ phased_arrays = [
 ]
 
 # Define grid for visualization
-x = np.linspace(-3, 3, 500)  # X-axis (horizontal distance)
-y = np.linspace(-3, 3, 500)  # Y-axis (vertical distance)
+x = np.linspace(-10,10, 500)  # X-axis (horizontal distance)
+y = np.linspace(-10, 10, 500)  # Y-axis (vertical distance)
 X, Y = np.meshgrid(x, y)  # Create a 2D grid
 
 # Calculate distances and phase shifts for each array
