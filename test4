@@ -93,8 +93,6 @@ for array in phased_arrays:
 
 # Initialize plot
 fig, ax = plt.subplots(figsize=(8, 6))
-contour = ax.contourf(X, Y, np.zeros_like(X), levels=100, cmap='RdBu')  # Placeholder for the wave
-plt.colorbar(contour, ax=ax, label='Amplitude')
 
 # Plot source positions for each array
 for array_data in arrays_data:
@@ -103,9 +101,16 @@ for array_data in arrays_data:
 
 # Plot receiver positions and store them for later updates
 receiver_markers = []
+receiver_texts = []  # For displaying signal strengths
 for rx in receivers:
     marker = ax.scatter(*rx, color='green', marker='x', s=100, label="Receiver")
     receiver_markers.append(marker)
+    text = ax.text(rx[0] + 0.1, rx[1], "0", fontsize=9, color='black')  # Initial text for signal strength
+    receiver_texts.append(text)
+
+# Define the grid for the heatmap
+contour = ax.contourf(X, Y, np.zeros_like(X), levels=100, cmap='RdBu')  # Placeholder for the wave
+plt.colorbar(contour, ax=ax, label='Amplitude')
 
 ax.set_title("Phased Arrays with Receivers")
 ax.set_xlabel("X Position (wavelengths)")
@@ -131,7 +136,7 @@ def update(frame):
             for r, phi in zip(distances, phase_shifts):
                 resultant_wave += np.sin(k * r - omega * time + phi[wavelengths.index(wavelength)])
     
-    # Update the contour plot
+    # Update the contour plot (draw after the markers)
     for c in ax.collections:
         c.remove()
     ax.contourf(X, Y, resultant_wave, levels=100, cmap='RdBu')
@@ -150,9 +155,14 @@ def update(frame):
                 omega = 2 * np.pi * frequencies
                 signal += np.sin(k * distance - omega * time)
         
-        # Adjust the color range for visualization of stronger/ weaker signals
+        # Normalize the signal strength for marker size adjustment
         normalized_signal = (signal + 2) / 4  # Normalize to range [0, 1]
-        receiver_markers[i].set_facecolor(plt.cm.RdBu(normalized_signal))  # Update marker color based on signal
-ani = FuncAnimation(fig, update, frames=100, interval=50)  # 100 frames, 50ms interval
-# update(0)
+        receiver_markers[i].set_sizes([normalized_signal * 300])  # Size varies with signal
+        
+        # Update the text to show the signal strength
+        receiver_texts[i].set_text(f"{signal:.2f}")  # Display numerical value of the signal
+        receiver_texts[i].set_position((rx[0] + 0.1, rx[1]))  # Ensure text stays near the receiver marker
+
+# Start animation
+ani = FuncAnimation(fig, update, frames=200, interval=50)
 plt.show()
