@@ -1,0 +1,17 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Example data for polar plot
+angles = np.linspace(0, 2 * np.pi, 360)
+radii = 10 * np.sin(angles) + 20  # Example intensity values
+
+# Create polar plot
+fig, ax_polar = plt.subplots(subplot_kw={"projection": "polar"})
+ax_polar.plot(angles, radii)
+
+# Configure orientation
+ax_polar.set_theta_zero_location("N")  # 0° at the top (North)
+ax_polar.set_theta_direction(-1)       # Angles increase clockwise
+
+ax_polar.set_title("Polar Plot Example", va="bottom")
+plt.show()
