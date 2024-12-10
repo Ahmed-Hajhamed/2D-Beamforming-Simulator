@@ -1,0 +1,110 @@
+import sys
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QSlider, QSpinBox, QLabel, QComboBox, QPushButton
+
+class ArrayVisualizer(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        # Array parameters initialization
+        self.phased_arrays = [
+            {
+                "type": "linear",
+                "num_elements": 7,
+                "element_spacing": 0.5,
+                "frequencies": [1.0, 1.25],
+                "wavelengths": [1.0, 0.8],
+                "steering_angle": 300,  # Degrees
+                "position": [0, 0],
+            }
+        ]
+        
+        # Layout initialization
+        self.layout = QVBoxLayout()
+        self.controls_layout = QHBoxLayout()
+        
+        # Frequency Slider
+        self.frequency_label = QLabel("Frequency (Hz)")
+        self.frequency_slider = QSlider()
+        self.frequency_slider.setOrientation(1)  # 1 is horizontal
+        self.frequency_slider.setRange(10, 1000)
+        self.frequency_slider.setValue(100)
+        self.frequency_slider.valueChanged.connect(self.update_frequency)
+        self.controls_layout.addWidget(self.frequency_label)
+        self.controls_layout.addWidget(self.frequency_slider)
+
+        # Array Type Dropdown
+        self.array_type_label = QLabel("Array Type")
+        self.array_type_combo = QComboBox()
+        self.array_type_combo.addItems(["linear", "curved"])
+        self.array_type_combo.currentTextChanged.connect(self.update_array_type)
+        self.controls_layout.addWidget(self.array_type_label)
+        self.controls_layout.addWidget(self.array_type_combo)
+
+        # Steering Angle Slider
+        self.steering_angle_label = QLabel("Steering Angle (°)")
+        self.steering_angle_slider = QSlider()
+        self.steering_angle_slider.setOrientation(1)
+        self.steering_angle_slider.setRange(0, 360)
+        self.steering_angle_slider.setValue(300)
+        self.steering_angle_slider.valueChanged.connect(self.update_steering_angle)
+        self.controls_layout.addWidget(self.steering_angle_label)
+        self.controls_layout.addWidget(self.steering_angle_slider)
+        
+        # Add the control panel to the layout
+        self.layout.addLayout(self.controls_layout)
+
+        # Plot canvas setup
+        self.fig, self.ax = plt.subplots(figsize=(6, 6), subplot_kw={'projection': 'polar'})
+        self.canvas = FigureCanvas(self.fig)
+        self.layout.addWidget(self.canvas)
+
+        # Initial Plot
+        self.update_plot()
+
+        # Set layout for the window
+        self.setLayout(self.layout)
+
+    def update_frequency(self):
+        freq = self.frequency_slider.value()
+        self.phased_arrays[0]["frequencies"] = [freq]
+        self.phased_arrays[0]["wavelengths"] = [3e8 / (freq * 1e9)]  # Assuming frequency in GHz
+        self.update_plot()
+
+    def update_array_type(self):
+        array_type = self.array_type_combo.currentText()
+        self.phased_arrays[0]["type"] = array_type
+        self.update_plot()
+
+    def update_steering_angle(self):
+        steering_angle = self.steering_angle_slider.value()
+        self.phased_arrays[0]["steering_angle"] = steering_angle
+        self.update_plot()
+
+    def update_plot(self):
+        # Clear the current plot
+        self.ax.cla()
+
+        # For simplicity, assuming a basic beam profile visualization
+        # You would replace this with more complex logic for phased arrays
+        theta = np.linspace(0, 2 * np.pi, 100)
+        r = np.abs(np.sin(theta))
+
+        # Apply steering angle to the plot
+        steering_angle_rad = np.radians(self.phased_arrays[0]["steering_angle"])
+        theta += steering_angle_rad
+
+        # Plot the beam pattern
+        self.ax.plot(theta, r)
+
+        # Update canvas
+        self.canvas.draw()
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = ArrayVisualizer()
+    window.setWindowTitle("Phased Array Visualizer")
+    window.show()
+    sys.exit(app.exec_())
