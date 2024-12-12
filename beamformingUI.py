@@ -1,6 +1,6 @@
-from qt_material import apply_stylesheet
-from PyQt5 import QtCore, QtGui, QtWidgets
 
+from PyQt5 import QtCore, QtGui, QtWidgets
+from qt_material import apply_stylesheet
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -252,7 +252,7 @@ class Ui_MainWindow(object):
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    apply_stylesheet(app, "dark_blue.xml")
+    apply_stylesheet(app, "dark_medical.xml")
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)

@@ -10,13 +10,13 @@ phased_arrays = [
         "element_spacing": 0.5,
         "frequencies": [1.0, 1.25],
         "wavelengths": [1.0, 0.8],
-        "steering_angle": 30,  # Degrees
+        "steering_angle": -30,  # Degrees
         "position": [0, 0],
     }
     ,
     {
         "type": "curved",
-        "num_elements": 10,
+        "num_elements": 16,
         "frequencies": [0.8, 1.2],
         "wavelengths": [1.25, 1.0],
         "steering_angle": -60,
@@ -30,7 +30,7 @@ receivers = [(-1, 1), (1, -1), (-2, 2), (2, -2)]
 
 # Define grid for visualization
 x = np.linspace(-20, 20, 200)
-y = np.linspace(-20, 20, 200)
+y = np.linspace( -20, 20, 200)
 X, Y = np.meshgrid(x, y)
 
 # Define beam profile line (along X-axis for simplicity)
@@ -188,6 +188,25 @@ def update(frame):
     ax_polar.set_theta_direction(-1)  # Clockwise
     # ax_polar.plot(angles + np.pi / 2, polar_power_db)  # Add π/2 to rotate
     ax_polar.legend()
+
+    # ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+    # Configure wave plot (Crop to show only upward emission)
+    # ax_wave.set_ylim(0, 20)  # Show only the top half (positive Y)
+    # ax_wave.set_xlim(-20, 20)  # Maintain full X range
+    # ax_wave.set_title("Wave Field Visualization")
+    # ax_wave.set_xlabel("X Position (wavelengths)")
+    # ax_wave.set_ylabel("Y Position (wavelengths)")
+    # ax_wave.axis('equal')
+
+    # # Configure polar plot (Crop to show only upward emission)
+    # ax_polar.set_title("Polar Beam Pattern (Upwards Only)", va='bottom')
+    # ax_polar.set_ylim(-40, 0)  # Decibel range
+    # ax_polar.set_theta_zero_location("N")  # Set 0° to face upwards (North)
+    # ax_polar.set_theta_direction(-1)       # Set angle direction to clockwise
+    # # ax_polar.set_theta_offset(np.pi / 2)   # Rotate so 0° is at the top
+    # ax_polar.set_thetamin(-90)               # Show angles from 0° to 180° (upwards)
+    # ax_polar.set_thetamax(90)
+
 
 # Create animation
 ani = FuncAnimation(fig, update, frames=100, interval=50)
