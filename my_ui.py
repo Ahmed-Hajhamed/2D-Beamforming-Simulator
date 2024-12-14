@@ -327,7 +327,7 @@ def create_line_edit(Maximum=None, Minimum=0, place_holder = None):
 
 def create_label(text:str):
     label = QLabel(text)
-    label.setFixedHeight(30)
+    label.setFixedHeight(60)
     return label
 
 def creat_separator(type:str):
