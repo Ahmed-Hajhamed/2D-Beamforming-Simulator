@@ -1,7 +1,8 @@
 import numpy as np
 class PhasedArray():
-    def __init__(self, type, number_of_elements, position, frequencies, phase_shifts = None,
-                  elements_spacing = 0.5, steering_angle = None, raduis = None, arc_angle = None):
+    def __init__(self, name, type, number_of_elements, position, frequencies, meshgrid, phase_shifts = None,
+                  elements_spacing = None, steering_angle = None, raduis = None, arc_angle = None):
+        self.name = name
         self.type = type
         self.number_of_elements = number_of_elements
         self.elements_spacing = elements_spacing
@@ -11,7 +12,7 @@ class PhasedArray():
         self.position = position
         self.radius = raduis
         self.arc_angle= arc_angle
-        self.mesh_grid = None
+        self.mesh_grid = meshgrid
         self.source_positions = None
         self.phase_shifts = phase_shifts
         self.update_array()
@@ -31,6 +32,10 @@ class PhasedArray():
             ]
 
         self.source_positions = [pos + np.array([self.position[0], self.position[1]]) for pos in source_positions]
+
+        distances = [ 
+            np.sqrt((self.mesh_grid[0] - pos[0])**2 + (self.mesh_grid[1] - pos[1])**2) for pos in source_positions
+                                                                      ]
         
         if self.steering_angle is not None:
             
