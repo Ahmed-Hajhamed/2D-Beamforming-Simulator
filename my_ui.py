@@ -23,7 +23,7 @@ class beam_Plot(FigureCanvas):
 
 
 class ui(QMainWindow):
-    def __init__(self, MainWindow):
+    def __init__(self):
         super().__init__()
         self.setWindowTitle("Beamforming")
         self.setGeometry(100, 100, 1200, 800) 
@@ -130,7 +130,7 @@ class ui(QMainWindow):
 
         self.current_recivers_combo_box = QComboBox()
         self.button_of_add_new_reciver = QPushButton("Add Reciver")
-        h_layout_current_reciver = create_layout_of_parameter(self.current_recivers_combo_box, self.button_of_add_new_reciver)
+        h_layout_current_reciver = create_layout_of_parameter(self.button_of_add_new_reciver, self.current_recivers_combo_box)
         v_layout_of_reciver_parameter.addLayout(h_layout_current_reciver)
 
         # self.reciver_number = QComboBox()
