@@ -7,6 +7,7 @@ from PyQt5.QtCore import Qt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import sys
+from qt_material import apply_stylesheet
 
 class beam_Plot(FigureCanvas):
     def __init__(self, parent=None, width=5, height=4, dpi=100):
@@ -32,10 +33,10 @@ def creat_separator(type:str):
 def slider_creator(type="h", Maximum=100, Minimum=0):
     if type == "v":
         slider = QSlider(Qt.Vertical)
-        slider.setFixedHeight(100)
+        # slider.setFixedHeight(100)
     else:
         slider = QSlider(Qt.Horizontal)
-        slider.setFixedWidth(100)
+        # slider.setFixedWidth(100)
     
     slider.setMinimum(Minimum)
     slider.setMaximum(Maximum)
@@ -194,7 +195,7 @@ class ui(QMainWindow):
         grid_layout_of_output.addWidget(self.heat_map, 0, 0)
 
         self.transmiters_recivers_plotter = beam_Plot()
-        grid_layout_of_output.addWidget(self.transmiters_recivers_plotter, 1, 0)
+        grid_layout_of_output.addWidget(self.transmiters_recivers_plotter, 1, 1)
         
         self.beam_profile = beam_Plot()
         grid_layout_of_output.addWidget(self.beam_profile, 0, 1)
@@ -237,7 +238,7 @@ class ui(QMainWindow):
         grid_of_array_info.addWidget(self.label_info_arc_angle, 6, 0)
         grid_of_array_info.addWidget(self.label_info_arc_angle_value, 6, 1)
 
-        grid_layout_of_output.addLayout(grid_of_array_info, 1, 1)
+        grid_layout_of_output.addLayout(grid_of_array_info, 1, 0)
 
 
         h_main_layout.addLayout(grid_layout_of_output)
@@ -275,6 +276,7 @@ class ui(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    apply_stylesheet(app, "dark_purple.xml")
     window = ui()
     window.show()
     sys.exit(app.exec_())
