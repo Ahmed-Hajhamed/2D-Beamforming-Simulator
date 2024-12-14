@@ -1,0 +1,38 @@
+import numpy as np
+class PhasedArray():
+    def __init__(self):
+        self.type = None
+        self.number_of_elements = None
+        self.elements_spacing = None
+        self.frequencies = []
+        self.wavelengths = []
+        self.steering_angle = None # degrees
+        self.position = [0, 0]
+        self.radius = None
+        self.arc_angle= None
+        self.mesh_grid = None
+        self.source_positions = None
+
+    def update_array(self):
+        if self.type == "Linear":
+            source_positions = [
+                np.array([i * self.elements_spacing - (self.number_of_elements - 1) * self.elements_spacing / 2, 0])
+                for i in range(self.number_of_elements)
+            ]
+        if self.type == "Curved":
+            self.arc_angle = np.radians(self.arc_angle)
+            angles = np.linspace(-self.arc_angle / 2, self.arc_angle / 2, self.number_of_elements)
+            self.source_positions = [
+                np.array([self.radius * np.sin(angle), self.radius * np.cos(angle)]) for angle in angles
+            ]
+
+        self.source_positions = [pos + np.array([self.position[0], self.position[1]]) for pos in source_positions]
+
+        self.phase_shifts = [
+            [
+                2 * np.pi / wavelength * pos[0] * np.sin(self.steering_angle)
+                + 2 * np.pi / wavelength * pos[1] * np.cos(self.steering_angle)
+                for wavelength in self.wavelengths
+            ]
+            for pos in source_positions
+        ]
