@@ -139,9 +139,13 @@ class ui(QMainWindow):
         # h_layout_of_reciver_number = create_layout_of_parameter(self.label_of_reciver_number, self.reciver_number)
         # v_layout_of_reciver_parameter.addLayout(h_layout_of_reciver_number)
 
-        self.reciver_position = QLineEdit()
+        self.reciver_position_x = create_line_edit(Maximum=101)
+        self.reciver_position_y = create_line_edit(Maximum=101)
+        self.label_of_reciver_position_x= create_label("X")
+        self.label_of_reciver_position_y = create_label("Y")
         self.label_of_reciver_position = create_label("Position")
-        h_layout_of_reciver_position = create_layout_of_parameter(self.label_of_reciver_position, self.reciver_position)
+        h_layout_of_reciver_position = create_layout_of_parameter(self.label_of_reciver_position, self.label_of_reciver_position_x,
+                                                                   self.reciver_position_x, self.label_of_reciver_position_y, self.reciver_position_y)
         v_layout_of_reciver_parameter.addLayout(h_layout_of_reciver_position)
 
         self.reciver_name = QLineEdit()
@@ -173,9 +177,7 @@ class ui(QMainWindow):
         self.sperator_between_input_and_output = creat_separator("v")
         h_main_layout.addWidget(self.sperator_between_input_and_output)
         grid_layout_of_change_info  = QGridLayout()
-        
-        self.combo_box_of_array_for_edit = QComboBox()
-        # self.
+
 
         self.slider_for_change_transimter_number = slider_creator(Maximum=10)
         self.label_of_slider_for_change_transimter_number = QLabel("transmiter")
