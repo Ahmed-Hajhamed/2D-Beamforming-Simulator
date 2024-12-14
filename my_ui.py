@@ -7,6 +7,7 @@ from PyQt5.QtCore import Qt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import sys
+from qt_material import apply_stylesheet
 
 from tenacity import retry
 
@@ -372,6 +373,7 @@ def hide_layout(layout):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    apply_stylesheet(app, "dark_purple.xml")
     window = ui()
     window.show()
     sys.exit(app.exec_())
