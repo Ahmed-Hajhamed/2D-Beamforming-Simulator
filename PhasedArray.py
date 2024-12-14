@@ -8,6 +8,7 @@ class PhasedArray():
         self.elements_spacing = elements_spacing
         self.frequencies = np.array(frequencies)
         self.wavelengths = 1 / (self.frequencies + 1e-9)
+        self.wavelengths = list(self.wavelengths)
         self.steering_angle = steering_angle  #degrees
         self.position = position
         self.radius = raduis
@@ -33,7 +34,7 @@ class PhasedArray():
                 np.array([self.radius * np.sin(angle), self.radius * np.cos(angle)]) for angle in angles
             ]
 
-        self.source_positions = [pos + np.array([self.position[0], self.position[1]]) for pos in source_positions]
+        self.source_positions = np.array([pos + np.array([self.position[0], self.position[1]]) for pos in source_positions])
 
         self.distances = [ 
             np.sqrt((self.mesh_grid[0] - pos[0])**2 + (self.mesh_grid[1] - pos[1])**2) for pos in source_positions
@@ -50,7 +51,7 @@ class PhasedArray():
                 ]
                 for pos in source_positions
             ]
-            
+
     def calculate_beam_distances(self, beam_profile_x, beam_profile_y):
         self.beam_distances = [
         np.sqrt((beam_profile_x - self.position[0])**2 + (beam_profile_y - self.position[1])**2)

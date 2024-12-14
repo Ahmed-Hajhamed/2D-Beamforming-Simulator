@@ -15,7 +15,7 @@ from tenacity import retry
 
 class beam_Plot(FigureCanvas):
     def __init__(self, parent=None, width=4, height=3, dpi=100):
-        self.fig = Figure(figsize=(width, height), dpi=dpi)
+        self.fig = plt.figure(figsize=(width, height), dpi=dpi)
         self.axes = self.fig.add_subplot(111)
         # self.no_label = True 
         # self.vmin, self.vmax= 0, 0
