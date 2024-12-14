@@ -1,5 +1,59 @@
-class Main():
+from PyQt5.QtWidgets import (
+    QApplication)
+from qt_material import apply_stylesheet
+import sys
+import numpy as np
+from  PhasedArray import PhasedArray
+from Receiver import Receiver
+import my_ui
+class Main(my_ui.ui):
     def __init__(self):
-        self.receivers = None
-        self.arrays = dict
+        super().__init__()
+        self.receivers_ = {}
+        self.arrays = {}
         self.distances = None
+        x = np.linspace(-20, 20, 200)
+        y = np.linspace( -20, 20, 200)
+        self.meshgrid = np.meshgrid(x, y) 
+        self.save_button.clicked.connect(self.add_array)
+
+    def add_array(self):
+        name = self.array_name_line_edit.text()
+        number_of_elements = self.slider_of_transmiters_number.value()
+        frequencies_text = self.frequencies_line_edit.text()
+        frequencies_text = frequencies_text.split(",")
+        frequencies = []
+
+        for i in range (len(frequencies_text)):
+            frequencies.append(int(frequencies_text[i]))
+
+        steering_angle = self.slider_of_steering_angle.value()
+        position = np.array(int(self.position_line_edit.text()))
+
+        if self.radio_button_of_linear.isChecked():
+            array_type = "Linear"
+            elements_spacing = self.slider_of_element_spacing.value()
+            new_array = PhasedArray(name, array_type, number_of_elements, position, frequencies,
+                                     self.meshgrid, elements_spacing= elements_spacing, steering_angle= steering_angle)
+        elif self.radio_button_of_curve.isChecked():
+            array_type = "Curved"
+            arc_angle = self.slider_of_arc_angle.value()
+            raduis = int(self.radius_line_edit.text())
+            new_array = PhasedArray(name, array_type, number_of_elements, position, frequencies, self.meshgrid,
+                                    steering_angle= steering_angle, raduis= raduis, arc_angle= arc_angle)
+        self.arrays[name] = new_array
+
+    def update_array(self):
+        pass
+
+    def add_receiver(self):
+        name = self.reciver_name.text()
+        position = int(self.reciver_position.text())
+        new_receiver = Receiver(name, position)
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    apply_stylesheet(app, "dark_purple.xml")
+    window = Main()
+    window.show()
+    sys.exit(app.exec_())
