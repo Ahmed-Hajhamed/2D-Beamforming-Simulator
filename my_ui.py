@@ -1,3 +1,4 @@
+from email.charset import QP
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QGridLayout, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QFrame, QLineEdit, QRadioButton,
     QPushButton, QComboBox, QSlider, QFileDialog, QSpacerItem, QSizePolicy, QGraphicsScene, QCheckBox, QTabWidget
@@ -47,6 +48,11 @@ class ui(QMainWindow):
         h_layout_of_senario = create_layout_of_parameter(self.combo_box_of_senario, self.applay_the_senario)
         v_layout_of_paramet.addLayout(h_layout_of_senario)
 
+        self.current_arrays_combo_box = QComboBox()
+        self.button_of_add_new_array = QPushButton("Add Array")
+        h_layout_current_array = create_layout_of_parameter(self.current_arrays_combo_box, self.button_of_add_new_array)
+        v_layout_of_paramet.addLayout(h_layout_current_array)
+
         self.radio_button_of_linear = QRadioButton("linear")
         self.radio_button_of_linear.setChecked(True)
         self.radio_button_of_linear.toggled.connect(self.change_type)
@@ -83,9 +89,10 @@ class ui(QMainWindow):
 
         self.position_x_line_edit = create_line_edit(Maximum=101)
         self.position_y_line_edit = create_line_edit(Maximum=101)
+        self.label_position = create_label("Position")
         self.label_position_x = create_label("X")
         self.label_position_y = create_label("Y")
-        h_layout_of_position = create_layout_of_parameter(self.label_position_x, self.position_x_line_edit, self.label_position_y, self.position_y_line_edit)
+        h_layout_of_position = create_layout_of_parameter(self.label_position, self.label_position_x, self.position_x_line_edit, self.label_position_y, self.position_y_line_edit)
         v_layout_of_paramet.addLayout(h_layout_of_position)
 
         self.slider_of_steering_angle = slider_creator(Maximum=90, Minimum=-90)
@@ -119,6 +126,11 @@ class ui(QMainWindow):
         
         ##################################################
         v_layout_of_reciver_parameter = QVBoxLayout()
+
+        self.current_recivers_combo_box = QComboBox()
+        self.button_of_add_new_reciver = QPushButton("Add Reciver")
+        h_layout_current_reciver = create_layout_of_parameter(self.current_recivers_combo_box, self.button_of_add_new_reciver)
+        v_layout_of_reciver_parameter.addLayout(h_layout_current_reciver)
 
         self.reciver_number = QComboBox()
         self.reciver_number.addItem("Add Array")
@@ -340,7 +352,7 @@ def slider_creator(type="h", Maximum=100, Minimum=0):
     slider.setValue(Maximum//2)
     return slider
 
-def create_layout_of_parameter(widget_1, widget_2, widget_3 = None, widget_4 = None):
+def create_layout_of_parameter(widget_1, widget_2, widget_3 = None, widget_4 = None, widget_5 = None):
 
     h_layout_of_parameter = QHBoxLayout()
     h_layout_of_parameter.addWidget(widget_1)
@@ -351,6 +363,9 @@ def create_layout_of_parameter(widget_1, widget_2, widget_3 = None, widget_4 = N
     
     if widget_4 is not None:
         h_layout_of_parameter.addWidget(widget_4)
+
+    if widget_5 is not None:
+        h_layout_of_parameter.addWidget(widget_5)
     
     return h_layout_of_parameter
 
