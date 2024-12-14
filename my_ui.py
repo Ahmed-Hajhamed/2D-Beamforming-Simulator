@@ -9,6 +9,8 @@ from matplotlib.figure import Figure
 import sys
 from qt_material import apply_stylesheet
 
+from tenacity import retry
+
 class beam_Plot(FigureCanvas):
     def __init__(self, parent=None, width=4, height=3, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
@@ -35,6 +37,16 @@ class ui(QMainWindow):
         # v_layout_of_paramet.setStrech(1)
         # v_layout_of_paramet.setSpacing(15)
         
+        self.combo_box_of_senario = QComboBox()
+        self.combo_box_of_senario.addItem("5G")
+        self.combo_box_of_senario.addItem("Ultrasoundx")
+        self.combo_box_of_senario.addItem("Tumor Ablation")
+
+        self.applay_the_senario = QPushButton("Apply")
+
+        h_layout_of_senario = create_layout_of_parameter(self.combo_box_of_senario, self.applay_the_senario)
+        v_layout_of_paramet.addLayout(h_layout_of_senario)
+
         self.radio_button_of_linear = QRadioButton("linear")
         self.radio_button_of_linear.setChecked(True)
         self.radio_button_of_linear.toggled.connect(self.change_type)
@@ -46,40 +58,43 @@ class ui(QMainWindow):
         v_layout_of_paramet.addLayout(h_layout_of_select)
 
 
-        self.slider_of_transmiters_number = slider_creator()
+        self.slider_of_transmiters_number = slider_creator(Maximum=10)
         self.label_of_transmiters_number  = create_label("transmiter")
-        h_layout_transmiters_number = create_layout_of_parameter(self.label_of_transmiters_number, self.slider_of_transmiters_number)
+        self.label_of_transmiters_number_value = create_label(str(self.slider_of_transmiters_number.value()))
+        h_layout_transmiters_number = create_layout_of_parameter(self.label_of_transmiters_number, self.slider_of_transmiters_number, self.label_of_transmiters_number_value)
         v_layout_of_paramet.addLayout(h_layout_transmiters_number)
 
         self.slider_of_element_spacing = slider_creator(Maximum=200)
         self.label_of_element_spacing  = create_label("Element Spacing")
-        self.label_of_element_spacing_vlaue = create_label(str(self.slider_of_element_spacing.value()))
+        self.label_of_element_spacing_vlaue = create_label(str(self.slider_of_element_spacing.value())+" λ")
         h_layout_element_spacing = create_layout_of_parameter(self.label_of_element_spacing, self.slider_of_element_spacing, self.label_of_element_spacing_vlaue)
         v_layout_of_paramet.addLayout(h_layout_element_spacing)
 
 
-        self.frequencies_line_edit = QLineEdit()
+        self.frequencies_line_edit = create_line_edit(Maximum=100)
         self.label_frequencies = create_label("Frequecies")
         h_layout_of_frequencis = create_layout_of_parameter(self.label_frequencies, self.frequencies_line_edit)
         v_layout_of_paramet.addLayout(h_layout_of_frequencis)
 
-        self.frequencies_line_edit = QLineEdit()
-        self.label_frequencies = create_label("Wave Length")
-        h_layout_of_frequencis = create_layout_of_parameter(self.label_frequencies, self.frequencies_line_edit)
-        v_layout_of_paramet.addLayout(h_layout_of_frequencis)
+        # self.frequencies_line_edit = QLineEdit()
+        # self.label_frequencies = create_label("Wave Length")
+        # h_layout_of_frequencis = create_layout_of_parameter(self.label_frequencies, self.frequencies_line_edit)
+        # v_layout_of_paramet.addLayout(h_layout_of_frequencis)
 
-        self.position_line_edit = QLineEdit()
-        self.label_position = create_label("Positoin")
-        h_layout_of_position = create_layout_of_parameter(self.label_position, self.position_line_edit)
+        self.position_x_line_edit = create_line_edit(Maximum=101)
+        self.position_y_line_edit = create_line_edit(Maximum=101)
+        self.label_position_x = create_label("X")
+        self.label_position_y = create_label("Y")
+        h_layout_of_position = create_layout_of_parameter(self.label_position_x, self.position_x_line_edit, self.label_position_y, self.position_y_line_edit)
         v_layout_of_paramet.addLayout(h_layout_of_position)
 
         self.slider_of_steering_angle = slider_creator(Maximum=90, Minimum=-90)
         self.label_steering_angle = create_label("Steering Angle")
-        h_layout_of_steering_angle = create_layout_of_parameter(self.label_steering_angle, self.slider_of_steering_angle)
+        self.label_steering_angle_value = create_label(str(self.slider_of_steering_angle.value())+"˚")
+        h_layout_of_steering_angle = create_layout_of_parameter(self.label_steering_angle, self.slider_of_steering_angle, self.label_steering_angle_value)
         v_layout_of_paramet.addLayout(h_layout_of_steering_angle)
 
-        self.radius_line_edit = QLineEdit()
-        self.radius_line_edit.setValidator(QIntValidator(0, 100))
+        self.radius_line_edit = create_line_edit(Maximum=100)
         self.label_of_radius = create_label("Radius")
         self.h_layout_of_Radius = create_layout_of_parameter(self.label_of_radius, self.radius_line_edit)
         v_layout_of_paramet.addLayout(self.h_layout_of_Radius)
@@ -87,7 +102,8 @@ class ui(QMainWindow):
 
         self.slider_of_arc_angle = slider_creator(Maximum=90, Minimum=-90)
         self.label_arc_angle= create_label("Arc Angle")
-        self.h_layout_of_arc_angle = create_layout_of_parameter(self.label_arc_angle, self.slider_of_arc_angle)
+        self.label_arc_angle_value = create_label(str(self.slider_of_arc_angle.value())+"˚")
+        self.h_layout_of_arc_angle = create_layout_of_parameter(self.label_arc_angle, self.slider_of_arc_angle, self.label_arc_angle_value)
         v_layout_of_paramet.addLayout(self.h_layout_of_arc_angle)
         hide_layout(self.h_layout_of_arc_angle)
         
@@ -144,32 +160,45 @@ class ui(QMainWindow):
         self.sperator_between_input_and_output = creat_separator("v")
         h_main_layout.addWidget(self.sperator_between_input_and_output)
         grid_layout_of_change_info  = QGridLayout()
+        
+        self.combo_box_of_array_for_edit = QComboBox()
+        # self.
 
         self.slider_for_change_transimter_number = slider_creator(Maximum=10)
-        self.label_of_slider_for_change_transimter_number = QLabel("transmiter ")
+        self.label_of_slider_for_change_transimter_number = QLabel("transmiter")
+        self.label_of_slider_for_change_transimter_number_value = QLabel(str(self.slider_for_change_transimter_number.value()))
         grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_transimter_number, 0, 0)
         grid_layout_of_change_info.addWidget(self.slider_for_change_transimter_number, 0, 1)
+        grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_transimter_number_value, 0, 2)
         
 
         self.slider_for_change_2 = slider_creator()
         self.label_of_slider_for_change_2 = QLabel("text label")
+        self.label_of_slider_for_change_2_value = QLabel(str(self.slider_for_change_2.value()))
         grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_2, 1, 0)
         grid_layout_of_change_info.addWidget(self.slider_for_change_2, 1, 1)
+        grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_2_value, 1, 2)
 
         self.slider_for_change_3 = slider_creator()
         self.label_of_slider_for_change_3 = QLabel("text label")
+        self.label_of_slider_for_change_3_value = QLabel(str(self.slider_for_change_3.value()))
         grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_3, 2, 0)
         grid_layout_of_change_info.addWidget(self.slider_for_change_3, 2, 1)
+        grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_3_value, 2, 2)
 
         self.slider_for_change_4 = slider_creator()
         self.label_of_slider_for_change_4 = QLabel("text label")
+        self.label_of_slider_for_change_4_value = QLabel(str(self.slider_for_change_4.value()))
         grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_4, 3, 0)
         grid_layout_of_change_info.addWidget(self.slider_for_change_4, 3, 1)
+        grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_4_value, 3, 2)
 
         self.slider_for_change_5 = slider_creator()
         self.label_of_slider_for_change_5 = QLabel("text label")
+        self.label_of_slider_for_change_5_value = QLabel(str(self.slider_for_change_5.value()))
         grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_5, 4, 0)
         grid_layout_of_change_info.addWidget(self.slider_for_change_5, 4, 1)
+        grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_5_value, 4, 2)
 
         h_main_layout.addLayout(grid_layout_of_change_info)
         #####################################################################
@@ -273,6 +302,13 @@ class ui(QMainWindow):
         return band_layout
     
 
+def create_line_edit(Maximum=None, Minimum=0, place_holder = None):
+    line_edit = QLineEdit()
+    if Maximum is not None:
+        line_edit.setValidator(QIntValidator(0,Maximum+1))
+    if place_holder is not None:
+        line_edit.setPlaceholderText(place_holder)
+    return line_edit
 
 def create_label(text:str):
     label = QLabel(text)
@@ -304,14 +340,18 @@ def slider_creator(type="h", Maximum=100, Minimum=0):
     slider.setValue(Maximum//2)
     return slider
 
-def create_layout_of_parameter(widget_1, widget_2, widget_3 = None):
+def create_layout_of_parameter(widget_1, widget_2, widget_3 = None, widget_4 = None):
 
     h_layout_of_parameter = QHBoxLayout()
     h_layout_of_parameter.addWidget(widget_1)
     h_layout_of_parameter.addWidget(widget_2)
+    
     if widget_3 is not None:
         h_layout_of_parameter.addWidget(widget_3)
-
+    
+    if widget_4 is not None:
+        h_layout_of_parameter.addWidget(widget_4)
+    
     return h_layout_of_parameter
 
 
