@@ -13,8 +13,10 @@ class PhasedArray():
         self.radius = raduis
         self.arc_angle= arc_angle
         self.mesh_grid = meshgrid
+        self.distances = None
         self.source_positions = None
         self.phase_shifts = phase_shifts
+        self.beam_distances = None
         self.update_array()
 
     def update_array(self):
@@ -33,7 +35,7 @@ class PhasedArray():
 
         self.source_positions = [pos + np.array([self.position[0], self.position[1]]) for pos in source_positions]
 
-        distances = [ 
+        self.distances = [ 
             np.sqrt((self.mesh_grid[0] - pos[0])**2 + (self.mesh_grid[1] - pos[1])**2) for pos in source_positions
                                                                       ]
         
@@ -48,3 +50,8 @@ class PhasedArray():
                 ]
                 for pos in source_positions
             ]
+            
+    def calculate_beam_distances(self, beam_profile_x, beam_profile_y):
+        self.beam_distances = [
+        np.sqrt((beam_profile_x - self.position[0])**2 + (beam_profile_y - self.position[1])**2)
+                                ]

@@ -5,6 +5,7 @@ import sys
 import numpy as np
 from  PhasedArray import PhasedArray
 from Receiver import Receiver
+from matplotlib.animation import FuncAnimation
 import my_ui
 class Main(my_ui.ui):
     def __init__(self):
@@ -16,6 +17,12 @@ class Main(my_ui.ui):
         y = np.linspace( -20, 20, 200)
         self.meshgrid = np.meshgrid(x, y) 
         self.save_button.clicked.connect(self.add_array)
+        self.beam_profile_x = np.linspace(-20, 20, 500)
+        self.beam_profile_y = np.zeros_like(self.beam_profile_x)
+        self.beam_profile_angles = np.linspace(0, 2 * np.pi, 360)
+        self.beam_profile_power = np.zeros_like(self.beam_profile_angles)
+
+
 
     def add_array(self):
         name = self.array_name_line_edit.text()
@@ -28,20 +35,24 @@ class Main(my_ui.ui):
             frequencies.append(int(frequencies_text[i]))
 
         steering_angle = self.slider_of_steering_angle.value()
-        position = np.array(int(self.position_line_edit.text()))
+        position = np.array([int(self.position_x_line_edit.text()), int(self.position_y_line_edit.text())])
 
         if self.radio_button_of_linear.isChecked():
             array_type = "Linear"
             elements_spacing = self.slider_of_element_spacing.value()
             new_array = PhasedArray(name, array_type, number_of_elements, position, frequencies,
                                      self.meshgrid, elements_spacing= elements_spacing, steering_angle= steering_angle)
+            
         elif self.radio_button_of_curve.isChecked():
             array_type = "Curved"
             arc_angle = self.slider_of_arc_angle.value()
             raduis = int(self.radius_line_edit.text())
             new_array = PhasedArray(name, array_type, number_of_elements, position, frequencies, self.meshgrid,
                                     steering_angle= steering_angle, raduis= raduis, arc_angle= arc_angle)
+            
+        new_array.calculate_beam_distances(self.beam_profile_x, self.beam_profile_y)
         self.arrays[name] = new_array
+        self.animate()
 
     def update_array(self):
         pass
@@ -50,6 +61,97 @@ class Main(my_ui.ui):
         name = self.reciver_name.text()
         position = int(self.reciver_position.text())
         new_receiver = Receiver(name, position)
+        self.receivers_[name] = new_receiver
+
+    def draw_arrays(self):
+        for array in self.arrays.values():
+            self.transmiters_recivers_plotter.axes.scatter(
+            array.source_positions[:, 0], array.source_positions[:, 1], label=array.name, marker='o'
+                         )
+            
+    def draw_receivers(self):
+        receivers_positions = []
+        for receiver in self.receivers_.values():
+            receivers_positions.append(receiver.position)
+            self.receiver_texts = [
+                self.transmiters_recivers_plotter.axes.text(receiver.position[0] + 0.1,
+                                                        receiver.position[1], "", fontsize=8, color="black")
+                    ]
+        receiver_markers = self.transmiters_recivers_plotter.axes.scatter(*zip(*receivers_positions),
+                                                                      color='red', marker='x', s=100, label="Receivers")
+        
+    def update_phase_shifts(self):
+        self.arrays[self.combo_box_of_array_for_edit.currentText()].phase_shifts = \
+                        [self.slider]
+
+
+    def update(self, frame):
+        time = frame / 10.0
+        self.beam_profile_power.fill(0)
+        resultant_wave = np.zeros_like(self.meshgrid[0])
+        beam_profile_amplitude = np.zeros_like(self.beam_profile_x)
+        receiver_signals = []
+
+        for array in self.arrays.values():
+
+            for horizontal_displacement, beam_profile_displacement, phase_shift\
+                             in zip(array.distances, array.beam_distances, array.phase_shifts):
+                
+                for frequency, wavelength in zip(array.frequencies, array.wavelengths):
+                    wave_number = 2 * np.pi / wavelength
+                    omega = 2 * np.pi * frequency
+                    resultant_wave += np.sin(wave_number * horizontal_displacement - \
+                                             omega * time + phase_shift[array.wavelengths.index(wavelength)])
+                    beam_profile_amplitude += np.sin(wave_number * beam_profile_displacement - \
+                                                     omega * time + phase_shift[array.wavelengths.index(wavelength)])
+
+            for wavelength in array.wavelengths:
+                wave_number = 2 * np.pi / wavelength
+
+                # Compute steering vector and polar intensity
+                for theta_idx, theta in enumerate(self.beam_profile_angles):
+                    steering_vector = np.exp(1j * wave_number * (
+                        array.source_positions[:, 0] * np.cos(theta - array.steering_angle) +
+                        array.source_positions[:, 1] * np.sin(theta - array.steering_angle)
+                    ))
+                    self.beam_profile_power[theta_idx] += np.abs(np.sum(steering_vector))**2
+
+        for receiver in self.receivers_.values():
+            signal = 0
+            for array in self.arrays.values():
+                for horizontal_displacement, phase_shift in zip(array.distances, array.phase_shifts):
+                    signal += np.sin(2 * np.pi * np.linalg.norm(receiver) - omega * time + phase_shift[0])
+            receiver_signals.append(signal)
+
+        for idx, text in enumerate(self.receiver_texts):
+            text.set_text(f"{receiver_signals[idx]:.2f}")
+
+        # Update plots
+        for c in self.heat_map.axes.collections:
+            c.remove()
+        self.heat_map.axes.contourf(self.meshgrid[0], self.meshgrid[1], resultant_wave, levels=100, cmap='RdBu')
+
+        # Normalize polar power and convert to dB
+        polar_power_db = 10 * np.log10(self.beam_profile_power / np.max(self.beam_profile_power) + 1e-12)
+
+        # Update polar plot
+        self.beam_profile.axes.clear()
+        self.beam_profile.axes.plot(self.beam_profile_angles - np.pi /2, polar_power_db, label="Beam Pattern")
+        self.beam_profile.axes.set_theta_zero_location("N")
+        self.beam_profile.axes.set_theta_direction(-1)  # Clockwise
+        # ax_polar.plot(angles + np.pi / 2, polar_power_db)  # Add π/2 to rotate
+        self.beam_profile.axes.legend()
+
+    def animate(self):
+        ani = FuncAnimation(self.heat_map.fig, self.update, frames=100, interval=50)
+        ani2 = FuncAnimation(self.beam_profile.fig, self.update, frames=100, interval=50)
+        ani3 = FuncAnimation(self.transmiters_recivers_plotter.fig, self.update, frames=100, interval=50)
+        self.beam_profile.fig.tight_layout()
+        self.beam_profile.draw()
+        self.heat_map.fig.tight_layout()
+        self.heat_map.draw()
+        self.transmiters_recivers_plotter.fig.tight_layout()
+        self.transmiters_recivers_plotter.draw()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

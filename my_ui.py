@@ -7,6 +7,7 @@ from PyQt5.QtGui import QIntValidator
 from PyQt5.QtCore import Qt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
 import sys
 from qt_material import apply_stylesheet
 
@@ -14,15 +15,15 @@ from tenacity import retry
 
 class beam_Plot(FigureCanvas):
     def __init__(self, parent=None, width=4, height=3, dpi=100):
-        fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = fig.add_subplot(111)
+        self.fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = self.fig.add_subplot(111)
         # self.no_label = True 
         # self.vmin, self.vmax= 0, 0
-        super().__init__(fig)
+        super().__init__(self.fig)
 
 
 class ui(QMainWindow):
-    def __init__(self):
+    def __init__(self, MainWindow):
         super().__init__()
         self.setWindowTitle("Beamforming")
         self.setGeometry(100, 100, 1200, 800) 
@@ -291,12 +292,12 @@ class ui(QMainWindow):
             show_layout(self.h_layout_of_arc_angle)
 
     def slider_creator(self, number_of_slider):  ### not used yet###
-        self.number_of_sliders = 10 
+        self.number_of_sliders = number_of_slider 
         band_layout = QGridLayout()
         self.gain = [1] * self.number_of_sliders
         self.slider_values.clear()
         for i in range(self.number_of_sliders):
-            slider = QSlider(Qt.Vertical)
+            slider = QSlider(Qt.Horizontal)
             slider.setMinimum(-90)
             slider.setMaximum(90)
             slider.setValue(0)
