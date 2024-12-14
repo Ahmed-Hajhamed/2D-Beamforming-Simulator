@@ -50,7 +50,7 @@ class ui(QMainWindow):
 
         self.current_arrays_combo_box = QComboBox()
         self.button_of_add_new_array = QPushButton("Add Array")
-        h_layout_current_array = create_layout_of_parameter(self.current_arrays_combo_box, self.button_of_add_new_array)
+        h_layout_current_array = create_layout_of_parameter( self.button_of_add_new_array, self.current_arrays_combo_box)
         v_layout_of_paramet.addLayout(h_layout_current_array)
 
         self.radio_button_of_linear = QRadioButton("linear")
@@ -132,11 +132,11 @@ class ui(QMainWindow):
         h_layout_current_reciver = create_layout_of_parameter(self.current_recivers_combo_box, self.button_of_add_new_reciver)
         v_layout_of_reciver_parameter.addLayout(h_layout_current_reciver)
 
-        self.reciver_number = QComboBox()
-        self.reciver_number.addItem("Add Array")
-        self.label_of_reciver_number = create_label("Reciver")
-        h_layout_of_reciver_number = create_layout_of_parameter(self.label_of_reciver_number, self.reciver_number)
-        v_layout_of_reciver_parameter.addLayout(h_layout_of_reciver_number)
+        # self.reciver_number = QComboBox()
+        # self.reciver_number.addItem("Add Array")
+        # self.label_of_reciver_number = create_label("Reciver")
+        # h_layout_of_reciver_number = create_layout_of_parameter(self.label_of_reciver_number, self.reciver_number)
+        # v_layout_of_reciver_parameter.addLayout(h_layout_of_reciver_number)
 
         self.reciver_position = QLineEdit()
         self.label_of_reciver_position = create_label("Position")
