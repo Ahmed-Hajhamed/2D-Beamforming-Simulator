@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QGridLayout, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QFrame, QLineEdit, 
-    QPushButton, QComboBox, QSlider, QFileDialog, QProgressBar, QGraphicsView, QGraphicsScene, QCheckBox, QTabWidget
+    QApplication, QMainWindow, QGridLayout, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QFrame, QLineEdit, QRadioButton,
+    QPushButton, QComboBox, QSlider, QFileDialog, QSpacerItem, QSizePolicy, QGraphicsScene, QCheckBox, QTabWidget
 )
 from PyQt5.QtGui import QIntValidator
 from PyQt5.QtCore import Qt
@@ -9,49 +9,12 @@ from matplotlib.figure import Figure
 import sys
 
 class beam_Plot(FigureCanvas):
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
+    def __init__(self, parent=None, width=4, height=3, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
         # self.no_label = True 
         # self.vmin, self.vmax= 0, 0
         super().__init__(fig)
-
-
-def creat_separator(type:str):
-    separator = QFrame()
-    if type == "h":
-        separator.setFrameShape(QFrame.HLine)
-    elif type == "v":
-        separator.setFrameShape(QFrame.VLine)
-    else : 
-        return
-    separator.setFrameShadow(QFrame.Sunken)
-    separator.setStyleSheet("padding: 0px;")
-    return separator
-
-def slider_creator(type="h", Maximum=100, Minimum=0):
-    if type == "v":
-        slider = QSlider(Qt.Vertical)
-        slider.setFixedHeight(100)
-    else:
-        slider = QSlider(Qt.Horizontal)
-        slider.setFixedWidth(100)
-    
-    slider.setMinimum(Minimum)
-    slider.setMaximum(Maximum)
-    slider.setValue(Maximum//2)
-    return slider
-
-def create_layout_of_parameter(label, widget):
-    # h_layout_of_parameter = f"h_layout_of_{label.Text()}"
-    # globals()[h_layout_of_parameter] = QVBoxLayout()
-
-    h_layout_of_parameter = QHBoxLayout()
-    h_layout_of_parameter.addWidget(label)
-    h_layout_of_parameter.addWidget(widget)
-
-    return h_layout_of_parameter
-
 
 
 class ui(QMainWindow):
@@ -66,49 +29,69 @@ class ui(QMainWindow):
         h_main_layout = QHBoxLayout()
         ############################################################
         v_layout_of_paramet = QVBoxLayout()
+        # spacer = QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Fixed)
+        # v_layout_of_paramet.addItem(spacer)
+        # v_layout_of_paramet.setStrech(1)
+        # v_layout_of_paramet.setSpacing(15)
         
-        self.combo_box_of_type = QComboBox()
-        self.combo_box_of_type.addItem("Linear")
-        self.combo_box_of_type.addItem("Curve")
-        self.label_select = QLabel("Aelect Array")
-        h_layout_of_select = create_layout_of_parameter(self.label_select, self.combo_box_of_type)
+        self.radio_button_of_linear = QRadioButton("linear")
+        self.radio_button_of_linear.setChecked(True)
+        self.radio_button_of_linear.toggled.connect(self.change_type)
+
+        self.radio_button_of_curve = QRadioButton("curve")
+        self.radio_button_of_curve.toggled.connect(self.change_type)
+        
+        h_layout_of_select = create_layout_of_parameter(self.radio_button_of_linear, self.radio_button_of_curve)
         v_layout_of_paramet.addLayout(h_layout_of_select)
 
 
         self.slider_of_transmiters_number = slider_creator()
-        self.label_of_transmiters_number  = QLabel("transmiter")
+        self.label_of_transmiters_number  = create_label("transmiter")
         h_layout_transmiters_number = create_layout_of_parameter(self.label_of_transmiters_number, self.slider_of_transmiters_number)
         v_layout_of_paramet.addLayout(h_layout_transmiters_number)
 
+        self.slider_of_element_spacing = slider_creator(Maximum=200)
+        self.label_of_element_spacing  = create_label("Element Spacing")
+        self.label_of_element_spacing_vlaue = create_label(str(self.slider_of_element_spacing.value()))
+        h_layout_element_spacing = create_layout_of_parameter(self.label_of_element_spacing, self.slider_of_element_spacing, self.label_of_element_spacing_vlaue)
+        v_layout_of_paramet.addLayout(h_layout_element_spacing)
+
 
         self.frequencies_line_edit = QLineEdit()
-        self.label_frequencies = QLabel("Frequecies")
+        self.label_frequencies = create_label("Frequecies")
+        h_layout_of_frequencis = create_layout_of_parameter(self.label_frequencies, self.frequencies_line_edit)
+        v_layout_of_paramet.addLayout(h_layout_of_frequencis)
+
+        self.frequencies_line_edit = QLineEdit()
+        self.label_frequencies = create_label("Wave Length")
         h_layout_of_frequencis = create_layout_of_parameter(self.label_frequencies, self.frequencies_line_edit)
         v_layout_of_paramet.addLayout(h_layout_of_frequencis)
 
         self.position_line_edit = QLineEdit()
-        self.label_position = QLabel("Positoin")
+        self.label_position = create_label("Positoin")
         h_layout_of_position = create_layout_of_parameter(self.label_position, self.position_line_edit)
         v_layout_of_paramet.addLayout(h_layout_of_position)
 
         self.slider_of_steering_angle = slider_creator(Maximum=90, Minimum=-90)
-        self.label_steering_angle = QLabel("Steering Angle")
+        self.label_steering_angle = create_label("Steering Angle")
         h_layout_of_steering_angle = create_layout_of_parameter(self.label_steering_angle, self.slider_of_steering_angle)
         v_layout_of_paramet.addLayout(h_layout_of_steering_angle)
 
         self.radius_line_edit = QLineEdit()
         self.radius_line_edit.setValidator(QIntValidator(0, 100))
-        self.label_of_radius = QLabel("Radius")
-        h_layout_of_Radius = create_layout_of_parameter(self.label_of_radius, self.radius_line_edit)
-        v_layout_of_paramet.addLayout(h_layout_of_Radius)
+        self.label_of_radius = create_label("Radius")
+        self.h_layout_of_Radius = create_layout_of_parameter(self.label_of_radius, self.radius_line_edit)
+        v_layout_of_paramet.addLayout(self.h_layout_of_Radius)
+        hide_layout(self.h_layout_of_Radius)
 
         self.slider_of_arc_angle = slider_creator(Maximum=90, Minimum=-90)
-        self.label_arc_angle= QLabel("Arc Angle")
-        h_layout_of_arc_angle = create_layout_of_parameter(self.label_arc_angle, self.slider_of_arc_angle)
-        v_layout_of_paramet.addLayout(h_layout_of_arc_angle)
+        self.label_arc_angle= create_label("Arc Angle")
+        self.h_layout_of_arc_angle = create_layout_of_parameter(self.label_arc_angle, self.slider_of_arc_angle)
+        v_layout_of_paramet.addLayout(self.h_layout_of_arc_angle)
+        hide_layout(self.h_layout_of_arc_angle)
         
         self.array_name_line_edit = QLineEdit()
-        self.label_of_array_name = QLabel("Array Name")
+        self.label_of_array_name = create_label("Array Name")
         h_layout_of_array_name = create_layout_of_parameter(self.label_of_array_name, self.array_name_line_edit)
         v_layout_of_paramet.addLayout(h_layout_of_array_name)
 
@@ -120,18 +103,19 @@ class ui(QMainWindow):
         ##################################################
         v_layout_of_reciver_parameter = QVBoxLayout()
 
-        self.reciver_number = QLineEdit()
-        self.label_of_reciver_number = QLabel("Reciver")
+        self.reciver_number = QComboBox()
+        self.reciver_number.addItem("Add Array")
+        self.label_of_reciver_number = create_label("Reciver")
         h_layout_of_reciver_number = create_layout_of_parameter(self.label_of_reciver_number, self.reciver_number)
         v_layout_of_reciver_parameter.addLayout(h_layout_of_reciver_number)
 
         self.reciver_position = QLineEdit()
-        self.label_of_reciver_position = QLabel("Position")
+        self.label_of_reciver_position = create_label("Position")
         h_layout_of_reciver_position = create_layout_of_parameter(self.label_of_reciver_position, self.reciver_position)
         v_layout_of_reciver_parameter.addLayout(h_layout_of_reciver_position)
 
         self.reciver_name = QLineEdit()
-        self.label_of_reciver_name = QLabel("Name")
+        self.label_of_reciver_name = create_label("Name")
         h_layout_of_reciver_name = create_layout_of_parameter(self.label_of_reciver_name, self.reciver_name)
         v_layout_of_reciver_parameter.addLayout(h_layout_of_reciver_name)
 
@@ -151,6 +135,7 @@ class ui(QMainWindow):
         
         v_layout_input.addLayout(v_layout_of_reciver_parameter)
 
+        # v_layout_input.addStretch()
 
         h_main_layout.addLayout(v_layout_input)
         #####################################################################
@@ -206,8 +191,9 @@ class ui(QMainWindow):
         self.label_title = QLabel("Array information")
         grid_of_array_info.addWidget(self.label_title, 0, 0)
 
+
         self.label_info_array = QLabel("Array Name : ")
-        self.label_info_array_value = QLabel("………")
+        self.label_info_array_value = QComboBox()
         grid_of_array_info.addWidget(self.label_info_array, 1, 0)
         grid_of_array_info.addWidget(self.label_info_array_value, 1, 1)
 
@@ -247,7 +233,20 @@ class ui(QMainWindow):
         container = QWidget()
         container.setLayout(h_main_layout)
         self.setCentralWidget(container)
+    
+    def save_array(self):
+        pass
 
+    def save_reciver(self):
+        pass
+
+    def change_type(self):
+        if self.radio_button_of_linear.isChecked():
+            hide_layout(self.h_layout_of_Radius)
+            hide_layout(self.h_layout_of_arc_angle)
+        else:
+            show_layout(self.h_layout_of_Radius)
+            show_layout(self.h_layout_of_arc_angle)
 
     def slider_creator(self, number_of_slider):  ### not used yet###
         self.number_of_sliders = 10 
@@ -271,7 +270,65 @@ class ui(QMainWindow):
             band_layout.addWidget(slider, i, 1, 1, 1)
         
         return band_layout
+    
 
+
+def create_label(text:str):
+    label = QLabel(text)
+    label.setFixedHeight(30)
+    return label
+
+def creat_separator(type:str):
+    separator = QFrame()
+    if type == "h":
+        separator.setFrameShape(QFrame.HLine)
+    elif type == "v":
+        separator.setFrameShape(QFrame.VLine)
+    else : 
+        return
+    separator.setFrameShadow(QFrame.Sunken)
+    separator.setStyleSheet("padding: 0px;")
+    return separator
+
+def slider_creator(type="h", Maximum=100, Minimum=0):
+    if type == "v":
+        slider = QSlider(Qt.Vertical)
+        # slider.setFixedHeight(100)
+    else:
+        slider = QSlider(Qt.Horizontal)
+        # slider.setFixedWidth(100)
+    
+    slider.setMinimum(Minimum)
+    slider.setMaximum(Maximum)
+    slider.setValue(Maximum//2)
+    return slider
+
+def create_layout_of_parameter(widget_1, widget_2, widget_3 = None):
+
+    h_layout_of_parameter = QHBoxLayout()
+    h_layout_of_parameter.addWidget(widget_1)
+    h_layout_of_parameter.addWidget(widget_2)
+    if widget_3 is not None:
+        h_layout_of_parameter.addWidget(widget_3)
+
+    return h_layout_of_parameter
+
+
+def show_layout(layout):
+    if layout is None:
+        return
+    for i in range(layout.count()):
+        widget = layout.itemAt(i).widget()
+        if widget is not None:
+            widget.show()  # Show each widget
+
+def hide_layout(layout):
+    if layout is None:
+        return
+    for i in range(layout.count()):
+        widget = layout.itemAt(i).widget()
+        if widget is not None:
+            widget.hide()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
