@@ -15,9 +15,12 @@ from qt_material import apply_stylesheet
 from tenacity import retry
 
 class beam_Plot(FigureCanvas):
-    def __init__(self, parent=None, width=4, height=3, dpi=100):
+    def __init__(self, linear = True, parent=None, width=4, height=3, dpi=100):
         self.fig = plt.figure(figsize=(width, height), dpi=dpi)
-        self.axes = self.fig.add_subplot(111)
+        if linear:
+            self.axes = self.fig.add_subplot(111)
+        else:
+            self.axes = self.fig.add_subplot(111, projection='polar')
         # self.no_label = True 
         # self.vmin, self.vmax= 0, 0
         super().__init__(self.fig)
@@ -65,13 +68,13 @@ class ui(object):
         v_layout_of_paramet.addLayout(h_layout_of_select)
 
 
-        self.slider_of_transmiters_number = slider_creator(Maximum=10)
+        self.slider_of_transmiters_number = slider_creator(Maximum=16, Minimum=1)
         self.label_of_transmiters_number  = create_label("transmiter")
         self.label_of_transmiters_number_value = create_label(str(self.slider_of_transmiters_number.value()))
         h_layout_transmiters_number = create_layout_of_parameter(self.label_of_transmiters_number, self.slider_of_transmiters_number, self.label_of_transmiters_number_value)
         v_layout_of_paramet.addLayout(h_layout_transmiters_number)
 
-        self.slider_of_element_spacing = slider_creator(Maximum=200)
+        self.slider_of_element_spacing = slider_creator(Maximum=8, Minimum=1)
         self.label_of_element_spacing  = create_label("Element Spacing")
         self.label_of_element_spacing_vlaue = create_label(str(self.slider_of_element_spacing.value())+" λ")
         self.h_layout_element_spacing = create_layout_of_parameter(self.label_of_element_spacing, self.slider_of_element_spacing, self.label_of_element_spacing_vlaue)
@@ -88,8 +91,8 @@ class ui(object):
         # h_layout_of_frequencis = create_layout_of_parameter(self.label_frequencies, self.frequencies_line_edit)
         # v_layout_of_paramet.addLayout(h_layout_of_frequencis)
 
-        self.array_position_x_line_edit = create_line_edit(Maximum=101)
-        self.array_position_y_line_edit = create_line_edit(Maximum=101)
+        self.array_position_x_line_edit = create_line_edit(Maximum=100, Minimum= -100)
+        self.array_position_y_line_edit = create_line_edit(Maximum=100)
         self.label_position = create_label("Position")
         self.label_position_x = create_label("X")
         self.label_position_y = create_label("Y")
@@ -138,8 +141,8 @@ class ui(object):
         # h_layout_of_reciver_number = create_layout_of_parameter(self.label_of_reciver_number, self.reciver_number)
         # v_layout_of_reciver_parameter.addLayout(h_layout_of_reciver_number)
 
-        self.reciver_position_x = create_line_edit(Maximum=101)
-        self.reciver_position_y = create_line_edit(Maximum=101)
+        self.reciver_position_x = create_line_edit(Maximum=100, Minimum= -100)
+        self.reciver_position_y = create_line_edit(Maximum=100)
         self.label_of_reciver_position_x= create_label("X")
         self.label_of_reciver_position_y = create_label("Y")
         self.label_of_reciver_position = create_label("Position")
@@ -219,15 +222,14 @@ class ui(object):
         
         grid_layout_of_output = QGridLayout()
 
-        self.heat_map = beam_Plot()
-        grid_layout_of_output.addWidget(self.heat_map, 0, 0)
-
         self.transmiters_recivers_plotter = beam_Plot()
         grid_layout_of_output.addWidget(self.transmiters_recivers_plotter, 1, 1)
         
-        self.beam_profile = beam_Plot()
+        self.beam_profile = beam_Plot(linear= False)
         grid_layout_of_output.addWidget(self.beam_profile, 0, 1)
         
+        self.heat_map = beam_Plot()
+        grid_layout_of_output.addWidget(self.heat_map, 0, 0)
 
         #######################################################################
         grid_of_array_info = QGridLayout()
@@ -269,6 +271,19 @@ class ui(object):
 
         grid_layout_of_output.addLayout(grid_of_array_info, 1, 0)
 
+        self.heat_map.axes.set_title("Wave Field Visualization")
+        self.heat_map.axes.set_xlabel("X Position (wavelengths)")
+        self.heat_map.axes.set_ylabel("Y Position (wavelengths)")
+        self.heat_map.axes.axis('equal')
+
+        # Configure polar plot
+        self.beam_profile.axes.set_title("Polar Beam Pattern", va='bottom')
+        self.beam_profile.axes.set_ylim([-40, 0])  # Decibel range
+        self.transmiters_recivers_plotter.axes.set_title("Array Elements and Receivers")
+        self.transmiters_recivers_plotter.axes.set_xlabel("X Position (wavelengths)")
+        self.transmiters_recivers_plotter.axes.set_ylabel("Y Position (wavelengths)")
+        self.transmiters_recivers_plotter.axes.grid(True)
+        self.transmiters_recivers_plotter.axes.axis('equal')
 
         h_main_layout.addLayout(grid_layout_of_output)
 
@@ -350,7 +365,7 @@ class ui(object):
 def create_line_edit(Maximum=None, Minimum=0, place_holder = None):
     line_edit = QLineEdit()
     if Maximum is not None:
-        line_edit.setValidator(QIntValidator(0,Maximum+1))
+        line_edit.setValidator(QIntValidator(Minimum , Maximum+1))
     if place_holder is not None:
         line_edit.setPlaceholderText(place_holder)
     return line_edit
@@ -382,7 +397,7 @@ def slider_creator(type="h", Maximum=100, Minimum=0):
     
     slider.setMinimum(Minimum)
     slider.setMaximum(Maximum)
-    slider.setValue(Maximum//2)
+    slider.setValue((Maximum+Minimum)//2)
     return slider
 
 def create_layout_of_parameter(widget_1, widget_2, widget_3 = None, widget_4 = None, widget_5 = None):

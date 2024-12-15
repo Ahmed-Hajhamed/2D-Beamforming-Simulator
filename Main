@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow)
+from PyQt5.QtCore import QTimer
 from qt_material import apply_stylesheet
 import sys
 import numpy as np
@@ -17,7 +18,8 @@ class Main(QMainWindow, my_ui.ui):
         self.distances = None
         x = np.linspace(-20, 20, 200)
         y = np.linspace( -20, 20, 200)
-        self.meshgrid = np.meshgrid(x, y) 
+        self.meshgrid_x, self.meshgrid_y = np.meshgrid(x, y) 
+        self.meshgrid = np.array([self.meshgrid_x, self.meshgrid_y])
         self.save_button.clicked.connect(self.add_update_array)
         # self.button_of_add_new_array.clicked.connect()
         # self.button_of_add_new_reciver.clicked.connect(self.add_update_receiver)
@@ -26,6 +28,8 @@ class Main(QMainWindow, my_ui.ui):
         self.remove_button_of_reciver.clicked.connect(self.remove_receiver)
         self.current_arrays_combo_box.currentTextChanged.connect(self.change_current_array)
         self.current_recivers_combo_box.currentTextChanged.connect(self.change_current_receiver)
+        self.button_of_add_new_array.clicked.connect(self.clear_array_inputs)
+        self.button_of_add_new_reciver.clicked.connect(self.clear_receiver_inputs)
         self.beam_profile_x = np.linspace(-20, 20, 500)
         self.beam_profile_y = np.zeros_like(self.beam_profile_x)
         self.beam_profile_angles = np.linspace(0, 2 * np.pi, 360)
@@ -33,6 +37,15 @@ class Main(QMainWindow, my_ui.ui):
         self.current_array = None
         self.current_receiver = None
         self.receiver_texts = []
+        self.frame = 0
+        self.max_frames = 100  # Set the total number of frames
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_all)  # Call update_all() on timeout
+        self.timer.start(50)  # Trigger every 50 milliseconds
+
+    def update_all(self):
+        self.update(self.frame)
+        self.frame = (self.frame + 1) % self.max_frames
 
     def add_update_array(self):
         name = self.array_name_line_edit.text()
@@ -45,18 +58,19 @@ class Main(QMainWindow, my_ui.ui):
             frequencies.append(int(frequencies_text[i]))
 
         steering_angle = self.slider_of_steering_angle.value()
+        print(steering_angle)
         position = np.array([int(self.array_position_x_line_edit.text()), int(self.array_position_y_line_edit.text())])
 
         if self.radio_button_of_linear.isChecked():
             array_type = "Linear"
-            elements_spacing = self.slider_of_element_spacing.value()
+            elements_spacing = self.slider_of_element_spacing.value() * 0.5
             if self.current_arrays_combo_box.currentText() in self.arrays:
                 old_name = self.current_array.name
                 self.current_array.initialize_array_data(name, array_type, number_of_elements, position, frequencies,
                                         self.meshgrid, elements_spacing= elements_spacing, steering_angle= steering_angle)
             else:
                 new_array = PhasedArray(name, array_type, number_of_elements, position, frequencies,
-                        self.meshgrid, elements_spacing= elements_spacing, steering_angle= steering_angle)
+                        self.meshgrid, elements_spacing = elements_spacing, steering_angle = steering_angle)
                 
         elif self.radio_button_of_curve.isChecked():
             array_type = "Curved"
@@ -79,8 +93,11 @@ class Main(QMainWindow, my_ui.ui):
             self.arrays[name] = new_array
 
         self.current_arrays_combo_box.addItem(name)
+        self.change_current_array()
         self.draw_arrays()
-        self.animate()
+        # animator = my_ui.Animator(self.heat_map, self.beam_profile, self.transmiters_recivers_plotter)
+        # plt.show()
+        # self.animate()
 
     def add_update_receiver(self):
         name = self.reciver_name.text()
@@ -96,7 +113,7 @@ class Main(QMainWindow, my_ui.ui):
             self.receivers_[name] = new_receiver
             self.current_recivers_combo_box.addItem(name)
         self.draw_receivers()
-        self.animate()
+        # self.animate()
 
     def draw_arrays(self):
         for array in self.arrays.values():
@@ -131,7 +148,7 @@ class Main(QMainWindow, my_ui.ui):
 
         if self.current_array.array_type == "Linear":
             self.radio_button_of_linear.setChecked(True)
-            self.slider_of_element_spacing.setValue(self.current_array.elements_spacing)
+            self.slider_of_element_spacing.setValue(int(self.current_array.elements_spacing * 2))
         else:
             self.radio_button_of_curve.setChecked(True)
             self.radius_line_edit.setText(str(self.current_array.raduis))
@@ -148,7 +165,13 @@ class Main(QMainWindow, my_ui.ui):
             temp_receiver = self.receivers_[self.current_recivers_combo_box.currentText()]
             del temp_receiver
             del self.receivers_[self.current_recivers_combo_box.currentText()]
-        
+
+    def clear_array_inputs(self):
+        pass
+    
+    def clear_receiver_inputs(self):
+        pass
+
     def change_current_receiver(self):
         self.current_receiver = self.receivers_[self.current_recivers_combo_box.currentText()]
         self.reciver_name.setText(self.current_receiver.name)
@@ -158,7 +181,7 @@ class Main(QMainWindow, my_ui.ui):
     def update(self, frame):
         time = frame / 10.0
         self.beam_profile_power.fill(0)
-        resultant_wave = np.zeros_like(self.meshgrid[0])
+        resultant_wave = np.zeros_like(self.meshgrid_x)
         beam_profile_amplitude = np.zeros_like(self.beam_profile_x)
         receiver_signals = []
 
@@ -199,28 +222,20 @@ class Main(QMainWindow, my_ui.ui):
         # Update plots
         for c in self.heat_map.axes.collections:
             c.remove()
-        self.heat_map.axes.contourf(self.meshgrid[0], self.meshgrid[1], resultant_wave, levels=100, cmap='RdBu')
 
+        self.heat_map.axes.contourf(self.meshgrid_x, self.meshgrid_y, resultant_wave, levels=100, cmap='RdBu')
+        self.heat_map.draw()
         # Normalize polar power and convert to dB
         polar_power_db = 10 * np.log10(self.beam_profile_power / np.max(self.beam_profile_power) + 1e-12)
 
         # Update polar plot
         self.beam_profile.axes.clear()
         self.beam_profile.axes.plot(self.beam_profile_angles - np.pi /2, polar_power_db, label="Beam Pattern")
-        # self.beam_profile.axes.set_theta_zero_location("N")
-        # self.beam_profile.axes.set_theta_direction(-1)  # Clockwise
+        self.beam_profile.axes.set_theta_zero_location("N")
+        self.beam_profile.axes.set_theta_direction(-1)  # Clockwise
         # ax_polar.plot(angles + np.pi / 2, polar_power_db)  # Add π/2 to rotate
         self.beam_profile.axes.legend()
-
-    def animate(self):
-        ani = FuncAnimation(self.heat_map.fig, self.update, frames=10, interval=50)
-        ani2 = FuncAnimation(self.beam_profile.fig, self.update, frames=10, interval=50)
-        ani3 = FuncAnimation(self.transmiters_recivers_plotter.fig, self.update, frames=10, interval=50)
-        self.beam_profile.fig.tight_layout()
         self.beam_profile.draw()
-        self.heat_map.fig.tight_layout()
-        self.heat_map.draw()
-        self.transmiters_recivers_plotter.fig.tight_layout()
         self.transmiters_recivers_plotter.draw()
 
 if __name__ == "__main__":

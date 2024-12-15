@@ -14,7 +14,7 @@ class PhasedArray():
         self.number_of_elements = number_of_elements
         self.elements_spacing = elements_spacing
         self.frequencies = np.array(frequencies)
-        self.wavelengths = 1 / (self.frequencies + 1e-9)
+        self.wavelengths = 1 / (self.frequencies)
         self.wavelengths = list(self.wavelengths)
         self.steering_angle = steering_angle  #degrees
         self.position = position
@@ -31,7 +31,7 @@ class PhasedArray():
     def update_array(self):
         if self.array_type == "Linear":
             self.elements_spacing_lambda = self.elements_spacing * self.wavelengths[0]
-            source_positions = [
+            self.source_positions = [
                 np.array([i * self.elements_spacing_lambda - (self.number_of_elements - 1) * self.elements_spacing_lambda / 2, 0])
                 for i in range(self.number_of_elements)
             ]
@@ -42,10 +42,10 @@ class PhasedArray():
                 np.array([self.radius * np.sin(angle), self.radius * np.cos(angle)]) for angle in angles
             ]
 
-        self.source_positions = np.array([pos + np.array([self.position[0], self.position[1]]) for pos in source_positions])
+        self.source_positions = np.array([pos + np.array([self.position[0], self.position[1]]) for pos in self.source_positions])
 
         self.distances = [ 
-            np.sqrt((self.mesh_grid[0] - pos[0])**2 + (self.mesh_grid[1] - pos[1])**2) for pos in source_positions
+            np.sqrt((self.mesh_grid[0] - pos[0])**2 + (self.mesh_grid[1] - pos[1])**2) for pos in self.source_positions
                                                                       ]
         
         if self.steering_angle is not None:
@@ -57,7 +57,7 @@ class PhasedArray():
                     + 2 * np.pi / wavelength * pos[1] * np.cos(self.steering_angle)
                     for wavelength in self.wavelengths
                 ]
-                for pos in source_positions
+                for pos in self.source_positions
             ]
 
     def calculate_beam_distances(self, beam_profile_x, beam_profile_y):
