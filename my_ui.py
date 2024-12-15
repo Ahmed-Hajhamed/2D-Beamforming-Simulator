@@ -22,13 +22,12 @@ class beam_Plot(FigureCanvas):
         super().__init__(self.fig)
 
 
-class ui(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Beamforming")
-        self.setGeometry(100, 100, 1200, 800) 
+class ui(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setWindowTitle("Beamforming")
+        MainWindow.setGeometry(100, 100, 1200, 800) 
 
-        self.slider_values = [] 
+        self.phase_shifts_sliders_values = [] 
 
         
         h_main_layout = QHBoxLayout()
@@ -74,8 +73,8 @@ class ui(QMainWindow):
         self.slider_of_element_spacing = slider_creator(Maximum=200)
         self.label_of_element_spacing  = create_label("Element Spacing")
         self.label_of_element_spacing_vlaue = create_label(str(self.slider_of_element_spacing.value())+" λ")
-        h_layout_element_spacing = create_layout_of_parameter(self.label_of_element_spacing, self.slider_of_element_spacing, self.label_of_element_spacing_vlaue)
-        v_layout_of_paramet.addLayout(h_layout_element_spacing)
+        self.h_layout_element_spacing = create_layout_of_parameter(self.label_of_element_spacing, self.slider_of_element_spacing, self.label_of_element_spacing_vlaue)
+        v_layout_of_paramet.addLayout(self.h_layout_element_spacing)
 
 
         self.frequencies_line_edit = create_line_edit(Maximum=100)
@@ -88,12 +87,12 @@ class ui(QMainWindow):
         # h_layout_of_frequencis = create_layout_of_parameter(self.label_frequencies, self.frequencies_line_edit)
         # v_layout_of_paramet.addLayout(h_layout_of_frequencis)
 
-        self.position_x_line_edit = create_line_edit(Maximum=101)
-        self.position_y_line_edit = create_line_edit(Maximum=101)
+        self.array_position_x_line_edit = create_line_edit(Maximum=101)
+        self.array_position_y_line_edit = create_line_edit(Maximum=101)
         self.label_position = create_label("Position")
         self.label_position_x = create_label("X")
         self.label_position_y = create_label("Y")
-        h_layout_of_position = create_layout_of_parameter(self.label_position, self.label_position_x, self.position_x_line_edit, self.label_position_y, self.position_y_line_edit)
+        h_layout_of_position = create_layout_of_parameter(self.label_position, self.label_position_x, self.array_position_x_line_edit, self.label_position_y, self.array_position_y_line_edit)
         v_layout_of_paramet.addLayout(h_layout_of_position)
 
         self.slider_of_steering_angle = slider_creator(Maximum=90, Minimum=-90)
@@ -176,46 +175,46 @@ class ui(QMainWindow):
         
         self.sperator_between_input_and_output = creat_separator("v")
         h_main_layout.addWidget(self.sperator_between_input_and_output)
-        grid_layout_of_change_info  = QGridLayout()
+        self.grid_layout_of_change_info  = QGridLayout()
 
 
-        self.slider_for_change_transimter_number = slider_creator(Maximum=10)
-        self.label_of_slider_for_change_transimter_number = QLabel("transmiter")
-        self.label_of_slider_for_change_transimter_number_value = QLabel(str(self.slider_for_change_transimter_number.value()))
-        grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_transimter_number, 0, 0)
-        grid_layout_of_change_info.addWidget(self.slider_for_change_transimter_number, 0, 1)
-        grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_transimter_number_value, 0, 2)
+        self.slider_for_change_1 = slider_creator(Maximum=10)
+        self.label_of_slider_for_change_transimter_number = QLabel("text label")
+        self.label_of_slider_for_change_transimter_number_value = QLabel(str(self.slider_for_change_1.value()))
+        self.grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_transimter_number, 0, 0)
+        self.grid_layout_of_change_info.addWidget(self.slider_for_change_1, 0, 1)
+        self.grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_transimter_number_value, 0, 2)
         
 
         self.slider_for_change_2 = slider_creator()
         self.label_of_slider_for_change_2 = QLabel("text label")
         self.label_of_slider_for_change_2_value = QLabel(str(self.slider_for_change_2.value()))
-        grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_2, 1, 0)
-        grid_layout_of_change_info.addWidget(self.slider_for_change_2, 1, 1)
-        grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_2_value, 1, 2)
+        self.grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_2, 1, 0)
+        self.grid_layout_of_change_info.addWidget(self.slider_for_change_2, 1, 1)
+        self.grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_2_value, 1, 2)
 
         self.slider_for_change_3 = slider_creator()
         self.label_of_slider_for_change_3 = QLabel("text label")
         self.label_of_slider_for_change_3_value = QLabel(str(self.slider_for_change_3.value()))
-        grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_3, 2, 0)
-        grid_layout_of_change_info.addWidget(self.slider_for_change_3, 2, 1)
-        grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_3_value, 2, 2)
+        self.grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_3, 2, 0)
+        self.grid_layout_of_change_info.addWidget(self.slider_for_change_3, 2, 1)
+        self.grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_3_value, 2, 2)
 
         self.slider_for_change_4 = slider_creator()
         self.label_of_slider_for_change_4 = QLabel("text label")
         self.label_of_slider_for_change_4_value = QLabel(str(self.slider_for_change_4.value()))
-        grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_4, 3, 0)
-        grid_layout_of_change_info.addWidget(self.slider_for_change_4, 3, 1)
-        grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_4_value, 3, 2)
+        self.grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_4, 3, 0)
+        self.grid_layout_of_change_info.addWidget(self.slider_for_change_4, 3, 1)
+        self.grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_4_value, 3, 2)
 
         self.slider_for_change_5 = slider_creator()
         self.label_of_slider_for_change_5 = QLabel("text label")
         self.label_of_slider_for_change_5_value = QLabel(str(self.slider_for_change_5.value()))
-        grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_5, 4, 0)
-        grid_layout_of_change_info.addWidget(self.slider_for_change_5, 4, 1)
-        grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_5_value, 4, 2)
+        self.grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_5, 4, 0)
+        self.grid_layout_of_change_info.addWidget(self.slider_for_change_5, 4, 1)
+        self.grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_5_value, 4, 2)
 
-        h_main_layout.addLayout(grid_layout_of_change_info)
+        h_main_layout.addLayout(self.grid_layout_of_change_info)
         #####################################################################
         
         grid_layout_of_output = QGridLayout()
@@ -277,7 +276,7 @@ class ui(QMainWindow):
 
         container = QWidget()
         container.setLayout(h_main_layout)
-        self.setCentralWidget(container)
+        MainWindow.setCentralWidget(container)
     
     def save_array(self):
         pass
@@ -290,25 +289,33 @@ class ui(QMainWindow):
             hide_layout(self.h_layout_of_Radius)
             hide_layout(self.h_layout_of_arc_angle)
         else:
+            hide_layout(self.h_layout_element_spacing)
             show_layout(self.h_layout_of_Radius)
             show_layout(self.h_layout_of_arc_angle)
 
-    def slider_creator(self, number_of_slider):  ### not used yet###
+    def remove_combobox_item(self, combo_box, text_to_remove):
+        text_to_remove = text_to_remove
+        index = combo_box.findText(text_to_remove)  # Find the index of the text
+        if index != -1:  # Check if the text exists
+            combo_box.removeItem(index)  # Remove the item
+
+
+    def slider_creator(self, Mainwindow, number_of_slider):  ### not used yet###
         self.number_of_sliders = number_of_slider 
         band_layout = QGridLayout()
         self.gain = [1] * self.number_of_sliders
-        self.slider_values.clear()
+        self.phase_shifts_sliders_values.clear()
         for i in range(self.number_of_sliders):
             slider = QSlider(Qt.Horizontal)
             slider.setMinimum(-90)
             slider.setMaximum(90)
-            slider.setValue(0)
+            slider.setValue(Mainwindow.current_array.phase_shifts[0])
             slider.setFixedWidth(100)
-            self.slider_values.append(slider.value())
-            slider.valueChanged.connect(lambda value, idx=i: self.apply_gain(value, idx))
+            self.phase_shifts_sliders_values.append(slider.value())
+            slider.valueChanged.connect(lambda value, idx=i: Mainwindow.update_phase_shifts(value, idx))
             
-            label = QLabel(str(self.names[i]))
-            label.setObjectName("slider_1_label")
+            label = QLabel(str(f"Transmitter {i + 1}"))
+            label.setObjectName(f"Transmitter_{i+1}_label")
             label.setFixedHeight(30)
             
             band_layout.addWidget(label, i, 0, 1, 1)
@@ -316,6 +323,29 @@ class ui(QMainWindow):
         
         return band_layout
     
+    def clear_layout(self, layout):
+        # Iterate and remove widgets
+        while layout.count():
+            item = layout.takeAt(0)  # Take the first item
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()  # Delete the widget
+            else:
+                # If it's a layout, clear it recursively
+                sub_layout = item.layout()
+                if sub_layout is not None:
+                    self.clear_layout_recursive(sub_layout)
+
+    def clear_layout_recursive(self, layout):
+        while layout.count():
+            item = layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
+            else:
+                sub_layout = item.layout()
+                if sub_layout is not None:
+                    self.clear_layout_recursive(sub_layout)
 
 def create_line_edit(Maximum=None, Minimum=0, place_holder = None):
     line_edit = QLineEdit()
@@ -388,11 +418,3 @@ def hide_layout(layout):
         widget = layout.itemAt(i).widget()
         if widget is not None:
             widget.hide()
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    apply_stylesheet(app, "dark_purple.xml")
-    window = ui()
-    window.show()
-    sys.exit(app.exec_())
-        

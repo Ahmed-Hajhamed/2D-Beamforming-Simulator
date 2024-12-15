@@ -1,9 +1,16 @@
 import numpy as np
 class PhasedArray():
-    def __init__(self, name, type, number_of_elements, position, frequencies, meshgrid, phase_shifts = None,
+    def __init__(self, name, array_type, number_of_elements, position, frequencies, meshgrid, phase_shifts = None,
                   elements_spacing = None, steering_angle = None, raduis = None, arc_angle = None):
+        
+        self.initialize_array_data(name, array_type, number_of_elements, position, frequencies, meshgrid, phase_shifts,
+                                elements_spacing, steering_angle, raduis, arc_angle)
+        self.update_array()
+
+    def initialize_array_data(self, name, array_type, number_of_elements, position, frequencies, meshgrid, phase_shifts = None,
+                  elements_spacing = None, steering_angle = None, raduis = None, arc_angle = None ):
         self.name = name
-        self.type = type
+        self.array_type = array_type
         self.number_of_elements = number_of_elements
         self.elements_spacing = elements_spacing
         self.frequencies = np.array(frequencies)
@@ -19,15 +26,15 @@ class PhasedArray():
         self.phase_shifts = phase_shifts
         self.beam_distances = None
         self.update_array()
-
+        
     def update_array(self):
-        if self.type == "Linear":
+        if self.array_type == "Linear":
             self.elements_spacing = self.elements_spacing * self.wavelengths[0]
             source_positions = [
                 np.array([i * self.elements_spacing - (self.number_of_elements - 1) * self.elements_spacing / 2, 0])
                 for i in range(self.number_of_elements)
             ]
-        if self.type == "Curved":
+        if self.array_type == "Curved":
             self.arc_angle = np.radians(self.arc_angle)
             angles = np.linspace(-self.arc_angle / 2, self.arc_angle / 2, self.number_of_elements)
             self.source_positions = [
