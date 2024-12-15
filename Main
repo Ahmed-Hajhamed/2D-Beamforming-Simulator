@@ -20,7 +20,8 @@ class Main(QMainWindow, my_ui.ui):
         self.meshgrid = np.meshgrid(x, y) 
         self.save_button.clicked.connect(self.add_update_array)
         # self.button_of_add_new_array.clicked.connect()
-        self.button_of_add_new_reciver.clicked.connect(self.add_update_receiver)
+        # self.button_of_add_new_reciver.clicked.connect(self.add_update_receiver)
+        self.save_button_of_reciver.clicked.connect(self.add_update_receiver)
         self.remove_array_button.clicked.connect(self.remove_array)
         self.remove_button_of_reciver.clicked.connect(self.remove_receiver)
         self.current_arrays_combo_box.currentTextChanged.connect(self.change_current_array)
@@ -83,7 +84,7 @@ class Main(QMainWindow, my_ui.ui):
 
     def add_update_receiver(self):
         name = self.reciver_name.text()
-        position = np.array([int(self.reciver_position_x.currentText()), int(self.reciver_position_y.currentText())])
+        position = np.array([int(self.reciver_position_x.text()), int(self.reciver_position_y.text())])
         if self.current_recivers_combo_box.currentText() in self.receivers_:
             old_name = self.current_receiver.name
             self.current_receiver.initialize_receiver_data(name, position)
@@ -189,7 +190,7 @@ class Main(QMainWindow, my_ui.ui):
             signal = 0
             for array in self.arrays.values():
                 for horizontal_displacement, phase_shift in zip(array.distances, array.phase_shifts):
-                    signal += np.sin(2 * np.pi * np.linalg.norm(receiver) - omega * time + phase_shift[0])
+                    signal += np.sin(2 * np.pi * np.linalg.norm(receiver.position) - omega * time + phase_shift[0])
             receiver_signals.append(signal)
 
         for idx, text in enumerate(self.receiver_texts):
@@ -206,15 +207,15 @@ class Main(QMainWindow, my_ui.ui):
         # Update polar plot
         self.beam_profile.axes.clear()
         self.beam_profile.axes.plot(self.beam_profile_angles - np.pi /2, polar_power_db, label="Beam Pattern")
-        self.beam_profile.axes.set_theta_zero_location("N")
-        self.beam_profile.axes.set_theta_direction(-1)  # Clockwise
+        # self.beam_profile.axes.set_theta_zero_location("N")
+        # self.beam_profile.axes.set_theta_direction(-1)  # Clockwise
         # ax_polar.plot(angles + np.pi / 2, polar_power_db)  # Add π/2 to rotate
         self.beam_profile.axes.legend()
 
     def animate(self):
-        ani = FuncAnimation(self.heat_map.fig, self.update, frames=100, interval=50)
-        ani2 = FuncAnimation(self.beam_profile.fig, self.update, frames=100, interval=50)
-        ani3 = FuncAnimation(self.transmiters_recivers_plotter.fig, self.update, frames=100, interval=50)
+        ani = FuncAnimation(self.heat_map.fig, self.update, frames=10, interval=50)
+        ani2 = FuncAnimation(self.beam_profile.fig, self.update, frames=10, interval=50)
+        ani3 = FuncAnimation(self.transmiters_recivers_plotter.fig, self.update, frames=10, interval=50)
         self.beam_profile.fig.tight_layout()
         self.beam_profile.draw()
         self.heat_map.fig.tight_layout()
