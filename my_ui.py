@@ -9,6 +9,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import sys
+import numpy as np
 from qt_material import apply_stylesheet
 
 from tenacity import retry
@@ -120,10 +121,9 @@ class ui(object):
         v_layout_of_paramet.addLayout(h_layout_of_array_name)
 
         self.save_button = QPushButton("Save")
-        self.remove_button = QPushButton("Remove")
-        h_layout_of_save_remove = create_layout_of_parameter(self.save_button, self.remove_button)
+        self.remove_array_button = QPushButton("Remove")
+        h_layout_of_save_remove = create_layout_of_parameter(self.save_button, self.remove_array_button)
         v_layout_of_paramet.addLayout(h_layout_of_save_remove)
-        
         ##################################################
         v_layout_of_reciver_parameter = QVBoxLayout()
 
@@ -309,7 +309,7 @@ class ui(object):
             slider = QSlider(Qt.Horizontal)
             slider.setMinimum(-90)
             slider.setMaximum(90)
-            slider.setValue(Mainwindow.current_array.phase_shifts[0])
+            slider.setValue(int(np.degrees(Mainwindow.current_array.phase_shifts[i][0])))
             slider.setFixedWidth(100)
             self.phase_shifts_sliders_values.append(slider.value())
             slider.valueChanged.connect(lambda value, idx=i: Mainwindow.update_phase_shifts(value, idx))

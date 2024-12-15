@@ -19,14 +19,21 @@ class Main(QMainWindow, my_ui.ui):
         y = np.linspace( -20, 20, 200)
         self.meshgrid = np.meshgrid(x, y) 
         self.save_button.clicked.connect(self.add_update_array)
+        # self.button_of_add_new_array.clicked.connect()
+        self.button_of_add_new_reciver.clicked.connect(self.add_update_receiver)
+        self.remove_array_button.clicked.connect(self.remove_array)
+        self.remove_button_of_reciver.clicked.connect(self.remove_receiver)
+        self.current_arrays_combo_box.currentTextChanged.connect(self.change_current_array)
+        self.current_recivers_combo_box.currentTextChanged.connect(self.change_current_receiver)
         self.beam_profile_x = np.linspace(-20, 20, 500)
         self.beam_profile_y = np.zeros_like(self.beam_profile_x)
         self.beam_profile_angles = np.linspace(0, 2 * np.pi, 360)
         self.beam_profile_power = np.zeros_like(self.beam_profile_angles)
         self.current_array = None
         self.current_receiver = None
+        self.receiver_texts = []
 
-    def add_update_array(self, update = False):
+    def add_update_array(self):
         name = self.array_name_line_edit.text()
         number_of_elements = self.slider_of_transmiters_number.value()
         frequencies_text = self.frequencies_line_edit.text()
@@ -37,57 +44,57 @@ class Main(QMainWindow, my_ui.ui):
             frequencies.append(int(frequencies_text[i]))
 
         steering_angle = self.slider_of_steering_angle.value()
-        position = np.array([int(self.position_x_line_edit.text()), int(self.position_y_line_edit.text())])
+        position = np.array([int(self.array_position_x_line_edit.text()), int(self.array_position_y_line_edit.text())])
 
         if self.radio_button_of_linear.isChecked():
             array_type = "Linear"
             elements_spacing = self.slider_of_element_spacing.value()
-            if not update:
-                new_array = PhasedArray(name, array_type, number_of_elements, position, frequencies,
+            if self.current_arrays_combo_box.currentText() in self.arrays:
+                old_name = self.current_array.name
+                self.current_array.initialize_array_data(name, array_type, number_of_elements, position, frequencies,
                                         self.meshgrid, elements_spacing= elements_spacing, steering_angle= steering_angle)
             else:
-                if self.current_arrays_combo_box.currentText() in self.arrays:
-                    old_name = self.current_array.name
-                    self.current_array.initialize_array_data(name, array_type, number_of_elements, position, frequencies,
-                                            self.meshgrid, elements_spacing= elements_spacing, steering_angle= steering_angle)
-                    
+                new_array = PhasedArray(name, array_type, number_of_elements, position, frequencies,
+                        self.meshgrid, elements_spacing= elements_spacing, steering_angle= steering_angle)
+                
         elif self.radio_button_of_curve.isChecked():
             array_type = "Curved"
             arc_angle = self.slider_of_arc_angle.value()
             raduis = int(self.radius_line_edit.text())
-            if not update:
-                new_array = PhasedArray(name, array_type, number_of_elements, position, frequencies, self.meshgrid,
+            if self.current_arrays_combo_box.currentText() in self.arrays:
+                old_name = self.current_array.name
+                self.current_array.initialize_array_data(name, array_type, number_of_elements, position, frequencies, self.meshgrid,
                                         steering_angle= steering_angle, raduis = raduis, arc_angle = arc_angle)
             else:
-                if self.current_arrays_combo_box.currentText() in self.arrays:
-                    old_name = self.current_array.name
-                    self.current_array.initialize_array_data(name, array_type, number_of_elements, position, frequencies, self.meshgrid,
-                                            steering_angle= steering_angle, raduis = raduis, arc_angle = arc_angle)
-        if not update:        
+                new_array = PhasedArray(name, array_type, number_of_elements, position, frequencies, self.meshgrid,
+                        steering_angle= steering_angle, raduis = raduis, arc_angle = arc_angle)
+                       
+        if self.current_arrays_combo_box.currentText() in self.arrays:
+            self.arrays[name] = self.arrays.pop(old_name)
+            self.current_array.calculate_beam_distances(self.beam_profile_x, self.beam_profile_y)
+            self.remove_combobox_item(self.current_arrays_combo_box, old_name)
+        else:
             new_array.calculate_beam_distances(self.beam_profile_x, self.beam_profile_y)
             self.arrays[name] = new_array
-        else:
-            if self.current_arrays_combo_box.currentText() in self.arrays:
-                self.arrays[name] = self.arrays.pop(old_name)
-                self.current_array.calculate_beam_distances(self.beam_profile_x, self.beam_profile_y)
-                self.remove_combobox_item(self.current_arrays_combo_box, old_name)
+
         self.current_arrays_combo_box.addItem(name)
+        self.draw_arrays()
         self.animate()
 
-    def add_update_receiver(self, update = False):
+    def add_update_receiver(self):
         name = self.reciver_name.text()
         position = np.array([int(self.reciver_position_x.currentText()), int(self.reciver_position_y.currentText())])
-        if not update:
+        if self.current_recivers_combo_box.currentText() in self.receivers_:
+            old_name = self.current_receiver.name
+            self.current_receiver.initialize_receiver_data(name, position)
+            self.receivers_[name] = self.receivers_.pop(old_name)
+            self.remove_combobox_item(self.current_recivers_combo_box, old_name)
+            self.current_recivers_combo_box.addItem(name)
+        else:
             new_receiver = Receiver(name, position)
             self.receivers_[name] = new_receiver
             self.current_recivers_combo_box.addItem(name)
-        else:
-            if self.current_recivers_combo_box.currentText() in self.receivers_:
-                old_name = self.current_receiver.name
-                self.current_receiver.initialize_receiver_data(name, position)
-                self.receivers_[name] = self.receivers_.pop(old_name)
-                self.remove_combobox_item(self.current_recivers_combo_box, old_name)
-                self.current_recivers_combo_box.addItem(name)
+        self.draw_receivers()
         self.animate()
 
     def draw_arrays(self):
@@ -129,13 +136,13 @@ class Main(QMainWindow, my_ui.ui):
             self.radius_line_edit.setText(str(self.current_array.raduis))
             self.slider_of_arc_angle.setValue(np.degrees(self.current_array.arc_angle))
 
-    def delete_array(self):
+    def remove_array(self):
         if self.current_arrays_combo_box.currentText() in self.arrays:
             temp_array = self.arrays[self.current_arrays_combo_box.currentText()]
             del temp_array
             del self.arrays[self.current_arrays_combo_box.currentText()]
         
-    def delete_receiver(self):
+    def remove_receiver(self):
         if self.current_recivers_combo_box.currentText() in self.receivers_:
             temp_receiver = self.receivers_[self.current_recivers_combo_box.currentText()]
             del temp_receiver

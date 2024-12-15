@@ -25,13 +25,14 @@ class PhasedArray():
         self.source_positions = None
         self.phase_shifts = phase_shifts
         self.beam_distances = None
+        self.elements_spacing_lambda = None
         self.update_array()
         
     def update_array(self):
         if self.array_type == "Linear":
-            self.elements_spacing = self.elements_spacing * self.wavelengths[0]
+            self.elements_spacing_lambda = self.elements_spacing * self.wavelengths[0]
             source_positions = [
-                np.array([i * self.elements_spacing - (self.number_of_elements - 1) * self.elements_spacing / 2, 0])
+                np.array([i * self.elements_spacing_lambda - (self.number_of_elements - 1) * self.elements_spacing_lambda / 2, 0])
                 for i in range(self.number_of_elements)
             ]
         if self.array_type == "Curved":
