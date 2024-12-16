@@ -81,12 +81,14 @@ class ui(object):
         v_layout_of_paramet.addLayout(h_layout_transmiters_number)
 
         self.slider_of_element_spacing = slider_creator(Maximum=8, Minimum=1)
+        self.slider_of_element_spacing.setValue(1)
         self.label_of_element_spacing  = create_label("Elements Spacing")
         self.label_of_element_spacing_vlaue = create_label(str(self.slider_of_element_spacing.value())+" λ")
-        self.h_layout_element_spacing = create_layout_of_parameter(self.label_of_element_spacing, self.slider_of_element_spacing, self.label_of_element_spacing_vlaue)
+        self.h_layout_element_spacing = create_layout_of_parameter(self.label_of_element_spacing, self.slider_of_element_spacing, 
+                                                                   self.label_of_element_spacing_vlaue)
         v_layout_of_paramet.addLayout(self.h_layout_element_spacing)
 
-        self.frequencies_line_edit = create_line_edit(Maximum=100)
+        self.frequencies_line_edit = create_line_edit()
         self.label_frequencies = create_label("Frequecies")
         h_layout_of_frequencis = create_layout_of_parameter(self.label_frequencies, self.frequencies_line_edit)
         v_layout_of_paramet.addLayout(h_layout_of_frequencis)
@@ -191,9 +193,9 @@ class ui(object):
         grid_of_array_info.addWidget(self.label_title, 0, 0)
 
         self.label_info_array = QLabel("Array Name : ")
-        self.label_info_array_value = QComboBox()
+        self.array_info_combobox = QComboBox()
         grid_of_array_info.addWidget(self.label_info_array, 1, 0)
-        grid_of_array_info.addWidget(self.label_info_array_value, 1, 1)
+        grid_of_array_info.addWidget(self.array_info_combobox, 1, 1)
 
         self.label_type = QLabel("Type  : ")
         self.label_of_which_type = QLabel("………")
@@ -210,16 +212,21 @@ class ui(object):
         grid_of_array_info.addWidget(self.label_info_frequencies, 4, 0)
         grid_of_array_info.addWidget(self.label_info_frequencies_value, 4, 1)
 
+        self.label_info_elements_spacing = QLabel("Elements Spacing") 
+        self.label_info_elements_spacing_value = QLabel("………")
+        grid_of_array_info.addWidget(self.label_info_elements_spacing, 5, 0)
+        grid_of_array_info.addWidget(self.label_info_elements_spacing_value, 5, 1)
+
         self.label_info_raduis = QLabel("Raduis")
         self.label_info_raduis_value = QLabel("………")
-        grid_of_array_info.addWidget(self.label_info_raduis, 5, 0)
-        grid_of_array_info.addWidget(self.label_info_raduis_value, 5, 1)
+        grid_of_array_info.addWidget(self.label_info_raduis, 6, 0)
+        grid_of_array_info.addWidget(self.label_info_raduis_value, 6, 1)
         
 
         self.label_info_arc_angle = QLabel("Arc Angle : ")
         self.label_info_arc_angle_value = QLabel("………")
-        grid_of_array_info.addWidget(self.label_info_arc_angle, 6, 0)
-        grid_of_array_info.addWidget(self.label_info_arc_angle_value, 6, 1)
+        grid_of_array_info.addWidget(self.label_info_arc_angle, 7, 0)
+        grid_of_array_info.addWidget(self.label_info_arc_angle_value, 7, 1)
 
         grid_layout_of_output.addLayout(grid_of_array_info, 1, 0)
 
