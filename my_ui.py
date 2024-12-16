@@ -57,11 +57,11 @@ class ui(object):
         h_layout_current_array = create_layout_of_parameter( self.button_of_add_new_array, self.current_arrays_combo_box)
         v_layout_of_paramet.addLayout(h_layout_current_array)
 
-        self.radio_button_of_linear = QRadioButton("linear")
+        self.radio_button_of_linear = QRadioButton("Linear")
         self.radio_button_of_linear.setChecked(True)
         self.radio_button_of_linear.toggled.connect(self.change_type)
 
-        self.radio_button_of_curve = QRadioButton("curve")
+        self.radio_button_of_curve = QRadioButton("Curved")
         self.radio_button_of_curve.toggled.connect(self.change_type)
         
         h_layout_of_select = create_layout_of_parameter(self.radio_button_of_linear, self.radio_button_of_curve)
@@ -69,13 +69,13 @@ class ui(object):
 
 
         self.slider_of_transmiters_number = slider_creator(Maximum=16, Minimum=1)
-        self.label_of_transmiters_number  = create_label("transmiter")
+        self.label_of_transmiters_number  = create_label("Transmitters")
         self.label_of_transmiters_number_value = create_label(str(self.slider_of_transmiters_number.value()))
         h_layout_transmiters_number = create_layout_of_parameter(self.label_of_transmiters_number, self.slider_of_transmiters_number, self.label_of_transmiters_number_value)
         v_layout_of_paramet.addLayout(h_layout_transmiters_number)
 
         self.slider_of_element_spacing = slider_creator(Maximum=8, Minimum=1)
-        self.label_of_element_spacing  = create_label("Element Spacing")
+        self.label_of_element_spacing  = create_label("Elements Spacing")
         self.label_of_element_spacing_vlaue = create_label(str(self.slider_of_element_spacing.value())+" λ")
         self.h_layout_element_spacing = create_layout_of_parameter(self.label_of_element_spacing, self.slider_of_element_spacing, self.label_of_element_spacing_vlaue)
         v_layout_of_paramet.addLayout(self.h_layout_element_spacing)
@@ -111,7 +111,7 @@ class ui(object):
         v_layout_of_paramet.addLayout(self.h_layout_of_Radius)
         hide_layout(self.h_layout_of_Radius)
 
-        self.slider_of_arc_angle = slider_creator(Maximum=90, Minimum=-90)
+        self.slider_of_arc_angle = slider_creator(Maximum=120, Minimum=-120)
         self.label_arc_angle= create_label("Arc Angle")
         self.label_arc_angle_value = create_label(str(self.slider_of_arc_angle.value())+"˚")
         self.h_layout_of_arc_angle = create_layout_of_parameter(self.label_arc_angle, self.slider_of_arc_angle, self.label_arc_angle_value)
@@ -303,6 +303,7 @@ class ui(object):
         if self.radio_button_of_linear.isChecked():
             hide_layout(self.h_layout_of_Radius)
             hide_layout(self.h_layout_of_arc_angle)
+            show_layout(self.h_layout_element_spacing)
         else:
             hide_layout(self.h_layout_element_spacing)
             show_layout(self.h_layout_of_Radius)

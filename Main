@@ -26,8 +26,8 @@ class Main(QMainWindow, my_ui.ui):
         self.save_button_of_reciver.clicked.connect(self.add_update_receiver)
         self.remove_array_button.clicked.connect(self.remove_array)
         self.remove_button_of_reciver.clicked.connect(self.remove_receiver)
-        self.current_arrays_combo_box.currentTextChanged.connect(self.change_current_array)
-        self.current_recivers_combo_box.currentTextChanged.connect(self.change_current_receiver)
+        # self.current_arrays_combo_box.currentTextChanged.connect(self.change_current_array)
+        # self.current_recivers_combo_box.currentTextChanged.connect(self.change_current_receiver)
         self.button_of_add_new_array.clicked.connect(self.clear_array_inputs)
         self.button_of_add_new_reciver.clicked.connect(self.clear_receiver_inputs)
         self.beam_profile_x = np.linspace(-20, 20, 500)
@@ -41,7 +41,7 @@ class Main(QMainWindow, my_ui.ui):
         self.max_frames = 100  # Set the total number of frames
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_all)  # Call update_all() on timeout
-        self.timer.start(50)  # Trigger every 50 milliseconds
+        self.timer.start(1000)  # Trigger every 50 milliseconds
 
     def update_all(self):
         self.update(self.frame)
@@ -58,7 +58,6 @@ class Main(QMainWindow, my_ui.ui):
             frequencies.append(int(frequencies_text[i]))
 
         steering_angle = self.slider_of_steering_angle.value()
-        print(steering_angle)
         position = np.array([int(self.array_position_x_line_edit.text()), int(self.array_position_y_line_edit.text())])
 
         if self.radio_button_of_linear.isChecked():
@@ -95,9 +94,6 @@ class Main(QMainWindow, my_ui.ui):
         self.current_arrays_combo_box.addItem(name)
         self.change_current_array()
         self.draw_arrays()
-        # animator = my_ui.Animator(self.heat_map, self.beam_profile, self.transmiters_recivers_plotter)
-        # plt.show()
-        # self.animate()
 
     def add_update_receiver(self):
         name = self.reciver_name.text()
@@ -151,8 +147,8 @@ class Main(QMainWindow, my_ui.ui):
             self.slider_of_element_spacing.setValue(int(self.current_array.elements_spacing * 2))
         else:
             self.radio_button_of_curve.setChecked(True)
-            self.radius_line_edit.setText(str(self.current_array.raduis))
-            self.slider_of_arc_angle.setValue(np.degrees(self.current_array.arc_angle))
+            self.radius_line_edit.setText(str(self.current_array.radius))
+            self.slider_of_arc_angle.setValue(int(np.degrees(self.current_array.arc_angle)))
 
     def remove_array(self):
         if self.current_arrays_combo_box.currentText() in self.arrays:
@@ -188,9 +184,9 @@ class Main(QMainWindow, my_ui.ui):
         for array in self.arrays.values():
 
             for horizontal_displacement, beam_profile_displacement, phase_shift\
-                             in zip(array.distances, array.beam_distances, array.phase_shifts):
+                             in zip(list(array.distances), list(array.beam_distances), list(array.phase_shifts)):
                 
-                for frequency, wavelength in zip(array.frequencies, array.wavelengths):
+                for frequency, wavelength in zip(list(array.frequencies), list(array.wavelengths)):
                     wave_number = 2 * np.pi / wavelength
                     omega = 2 * np.pi * frequency
                     resultant_wave += np.sin(wave_number * horizontal_displacement - \
@@ -202,7 +198,7 @@ class Main(QMainWindow, my_ui.ui):
                 wave_number = 2 * np.pi / wavelength
 
                 # Compute steering vector and polar intensity
-                for theta_idx, theta in enumerate(self.beam_profile_angles):
+                for theta_idx, theta in enumerate(list(self.beam_profile_angles)):
                     steering_vector = np.exp(1j * wave_number * (
                         array.source_positions[:, 0] * np.cos(theta - array.steering_angle) +
                         array.source_positions[:, 1] * np.sin(theta - array.steering_angle)
@@ -239,7 +235,6 @@ class Main(QMainWindow, my_ui.ui):
         self.transmiters_recivers_plotter.draw()
 
 if __name__ == "__main__":
-
     app = QApplication(sys.argv)
     apply_stylesheet(app, "dark_purple.xml")
     window = Main()

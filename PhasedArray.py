@@ -5,7 +5,6 @@ class PhasedArray():
         
         self.initialize_array_data(name, array_type, number_of_elements, position, frequencies, meshgrid, phase_shifts,
                                 elements_spacing, steering_angle, raduis, arc_angle)
-        self.update_array()
 
     def initialize_array_data(self, name, array_type, number_of_elements, position, frequencies, meshgrid, phase_shifts = None,
                   elements_spacing = None, steering_angle = None, raduis = None, arc_angle = None ):
@@ -35,7 +34,7 @@ class PhasedArray():
                 np.array([i * self.elements_spacing_lambda - (self.number_of_elements - 1) * self.elements_spacing_lambda / 2, 0])
                 for i in range(self.number_of_elements)
             ]
-        if self.array_type == "Curved":
+        elif self.array_type == "Curved":
             self.arc_angle = np.radians(self.arc_angle)
             angles = np.linspace(-self.arc_angle / 2, self.arc_angle / 2, self.number_of_elements)
             self.source_positions = [
