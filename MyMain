@@ -4,7 +4,7 @@ from PyQt5.QtCore import QTimer
 from qt_material import apply_stylesheet
 import sys
 import numpy as np
-from  PhasedArray import PhasedArray
+from  PhasedArray1 import array
 from Receiver import Receiver
 from matplotlib.animation import FuncAnimation
 import my_ui
@@ -42,14 +42,18 @@ class Main(QMainWindow, my_ui.ui):
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_all)  # Call update_all() on timeout
         self.timer.start(50)  # Trigger every 50 milliseconds
-        fig = plt.figure(figsize=(18, 6))
-        self.ax_wave = fig.add_subplot(131)  # Wave Field Visualization
+        # fig = plt.figure(figsize=(18, 6))
+        # self.ax_wave = fig.add_subplot(131)  # Wave Field Visualization
+        # self.my_array = None
+        # # Configure wave plot
+        # self.ax_wave.set_title("Wave Field Visualization")
+        # self.ax_wave.set_xlabel("X Position (wavelengths)")
+        # self.ax_wave.set_ylabel("Y Position (wavelengths)")
+        # self.ax_wave.axis('equal')
+        self.angles = np.linspace(0, 2 * np.pi, 360)
+        self.polar_power = np.zeros_like(self.angles)
+        self.receiverss =[(-1, 1), (1, -1), (-2, 2), (2, -2)]
 
-        # Configure wave plot
-        self.ax_wave.set_title("Wave Field Visualization")
-        self.ax_wave.set_xlabel("X Position (wavelengths)")
-        self.ax_wave.set_ylabel("Y Position (wavelengths)")
-        self.ax_wave.axis('equal')
 
     def update_all(self):
         self.update(self.frame)
@@ -71,41 +75,46 @@ class Main(QMainWindow, my_ui.ui):
         if self.radio_button_of_linear.isChecked():
             array_type = "Linear"
             elements_spacing = self.slider_of_element_spacing.value() * 0.5
+
             if self.current_arrays_combo_box.currentText() in self.arrays:
                 old_name = self.current_array.name
-                self.current_array.initialize_array_data(name, array_type, number_of_elements, position, frequencies,
-                                        self.meshgrid, elements_spacing= elements_spacing, steering_angle= steering_angle)
+                self.current_array.start_array(old_name, array_type, number_of_elements, frequencies, steering_angle, 
+                    position, self.meshgrid_x, self.meshgrid_y, self.beam_profile_x, self.beam_profile_y,
+                    element_spacing= elements_spacing)
             else:
-                new_array = PhasedArray(name, array_type, number_of_elements, position, frequencies,
-                        self.meshgrid, elements_spacing = elements_spacing, steering_angle = steering_angle)
+                new_array = array(name, array_type, number_of_elements, frequencies, steering_angle, 
+                    position, self.meshgrid_x, self.meshgrid_y, self.beam_profile_x, self.beam_profile_y,
+                    element_spacing= elements_spacing)
                 
         elif self.radio_button_of_curve.isChecked():
             array_type = "Curved"
             arc_angle = self.slider_of_arc_angle.value()
-            raduis = int(self.radius_line_edit.text())
+            radius = int(self.radius_line_edit.text())
+          
             if self.current_arrays_combo_box.currentText() in self.arrays:
                 old_name = self.current_array.name
-                self.current_array.initialize_array_data(name, array_type, number_of_elements, position, frequencies, self.meshgrid,
-                                        steering_angle= steering_angle, raduis = raduis, arc_angle = arc_angle)
+                self.current_array.start_array(old_name, array_type, number_of_elements, frequencies, steering_angle, position, self.meshgrid_x, 
+                                            self.meshgrid_y, self.beam_profile_x, self.beam_profile_y, element_spacing= None, radius= radius, 
+                                            arc_angle= arc_angle)
             else:
-                new_array = PhasedArray(name, array_type, number_of_elements, position, frequencies, self.meshgrid,
-                        steering_angle= steering_angle, raduis = raduis, arc_angle = arc_angle)
-                       
+                new_array = array(name, array_type, number_of_elements, frequencies, steering_angle, position, self.meshgrid_x, 
+                                            self.meshgrid_y, self.beam_profile_x, self.beam_profile_y, element_spacing= None, radius= radius, 
+                                            arc_angle= arc_angle)
+                
         if self.current_arrays_combo_box.currentText() in self.arrays:
             self.arrays[name] = self.arrays.pop(old_name)
-            self.current_array.calculate_beam_distances(self.beam_profile_x, self.beam_profile_y)
             self.remove_combobox_item(self.current_arrays_combo_box, old_name)
         else:
-            new_array.calculate_beam_distances(self.beam_profile_x, self.beam_profile_y)
             self.arrays[name] = new_array
-
+        # self.arrays[name] = new_array
         self.current_arrays_combo_box.addItem(name)
+        self.current_arrays_combo_box.setCurrentText(name)
         self.change_current_array()
         self.draw_arrays()
 
     def add_update_receiver(self):
         name = self.reciver_name.text()
-        position = np.array([int(self.reciver_position_x.text()), int(self.reciver_position_y.text())])
+        position = [int(self.reciver_position_x.text()), int(self.reciver_position_y.text())]
         if self.current_recivers_combo_box.currentText() in self.receivers_:
             old_name = self.current_receiver.name
             self.current_receiver.initialize_receiver_data(name, position)
@@ -116,15 +125,18 @@ class Main(QMainWindow, my_ui.ui):
             new_receiver = Receiver(name, position)
             self.receivers_[name] = new_receiver
             self.current_recivers_combo_box.addItem(name)
+        self.current_recivers_combo_box.setCurrentText(name)
         self.draw_receivers()
+        self.change_current_receiver()
         # self.animate()
 
     def draw_arrays(self):
-        for array in self.arrays.values():
+        for idx, array in enumerate(self.arrays.values()):
+            positions = np.array(array.array_data["positions"])
             self.transmiters_recivers_plotter.axes.scatter(
-            array.source_positions[:, 0], array.source_positions[:, 1], label=array.name, marker='o'
-                         )
-            
+                positions[:, 0], positions[:, 1], label=f"Array {idx+1}", marker='o'
+            )
+
     def draw_receivers(self):
         receivers_positions = []
         for receiver in self.receivers_.values():
@@ -142,6 +154,7 @@ class Main(QMainWindow, my_ui.ui):
         self.current_array.phase_shifts = self.phase_shifts_sliders_values
 
     def change_current_array(self):
+        self.clear_layout(self.grid_layout_of_change_info)
         self.current_array = self.arrays[self.current_arrays_combo_box.currentText()]
         self.grid_layout_of_change_info = self.slider_creator(self, self.current_array.number_of_elements)
         self.array_name_line_edit.setText(self.current_array.name)
@@ -183,67 +196,60 @@ class Main(QMainWindow, my_ui.ui):
         self.reciver_position_y.setText(str(self.current_receiver.position[1]))
 
     def update(self, frame):
+        # global polar_power
         time = frame / 10.0
-        self.beam_profile_power.fill(0)
+        self.polar_power.fill(0)
         resultant_wave = np.zeros_like(self.meshgrid_x)
         beam_profile_amplitude = np.zeros_like(self.beam_profile_x)
         receiver_signals = []
 
         for array in self.arrays.values():
+            positions = array.array_data["positions"]
+            distances = array.array_data["distances"]
+            beam_distances = array.array_data["beam_distances"]
+            phase_shifts = array.array_data["phase_shifts"]
+            frequencies = array.array_data["frequencies"]
+            wavelengths = array.array_data["wavelengths"]
+            steering_angle = array.array_data["steering_angle"]
 
-            for horizontal_displacement, beam_profile_displacement, phase_shift\
-                             in zip(list(array.distances), list(array.beam_distances), list(array.phase_shifts)):
-                
-                for frequency, wavelength in zip(list(array.frequencies), list(array.wavelengths)):
-                    wave_number = 2 * np.pi / wavelength
-                    omega = 2 * np.pi * frequency
-                    resultant_wave += np.sin(wave_number * horizontal_displacement - \
-                                             omega * time + phase_shift[array.wavelengths.index(wavelength)])
-                    beam_profile_amplitude += np.sin(wave_number * beam_profile_displacement - \
-                                                     omega * time + phase_shift[array.wavelengths.index(wavelength)])
+            for r, beam_r, phi in zip(distances, beam_distances, phase_shifts):
+                for freq, wavelength in zip(frequencies, wavelengths):
+                    k = 2 * np.pi / wavelength
+                    omega = 2 * np.pi * freq
+                    resultant_wave += np.sin(k * r - omega * time + phi[wavelengths.index(wavelength)])
+                    beam_profile_amplitude += np.sin(k * beam_r - omega * time + phi[wavelengths.index(wavelength)])
 
-            for wavelength in array.wavelengths:
-                wave_number = 2 * np.pi / wavelength
+            for wavelength in wavelengths:
+                k = 2 * np.pi / wavelength
 
                 # Compute steering vector and polar intensity
-                for theta_idx, theta in enumerate(list(self.beam_profile_angles)):
-                    steering_vector = np.exp(1j * wave_number * (
-                        array.source_positions[:, 0] * np.cos(theta - array.steering_angle) +
-                        array.source_positions[:, 1] * np.sin(theta - array.steering_angle)
+                for theta_idx, theta in enumerate(self.angles):
+                    steering_vector = np.exp(1j * k * (
+                        positions[:, 0] * np.cos(theta - steering_angle) +
+                        positions[:, 1] * np.sin(theta - steering_angle)
                     ))
-                    self.beam_profile_power[theta_idx] += np.abs(np.sum(steering_vector))**2
-
-        for receiver in self.receivers_.values():
+                    self.polar_power[theta_idx] += np.abs(np.sum(steering_vector))**2
+        for rx in self.receiverss:
             signal = 0
             for array in self.arrays.values():
-                for horizontal_displacement, phase_shift in zip(array.distances, array.phase_shifts):
-                    signal += np.sin(2 * np.pi * np.linalg.norm(receiver.position) - omega * time + phase_shift[0])
+                for r, phi in zip(array.array_data["distances"], array.array_data["phase_shifts"]):
+                    signal += np.sin(2 * np.pi * np.linalg.norm(rx) - omega * time + phi[0])
             receiver_signals.append(signal)
 
-        for idx, text in enumerate(self.receiver_texts):
-            text.set_text(f"{receiver_signals[idx]:.2f}")
+        for i, text in enumerate(self.receiver_texts):
+            text.set_text(f"{receiver_signals[i]:.2f}")
 
         # Update plots
         for c in self.heat_map.axes.collections:
             c.remove()
-
-        for c in self.ax_wave.collections:
-            c.remove()
-        self.ax_wave.contourf(self.meshgrid_x, self.meshgrid_y, resultant_wave, levels=100, cmap='RdBu')
-
-        vmin = np.min(resultant_wave) * 0.5  # Compress the range to enhance contrast
-        vmax = np.max(resultant_wave) * 0.5
-        self.heat_map.axes.contourf(self.meshgrid_x, self.meshgrid_y, resultant_wave, levels=900, cmap='RdBu', vmin=vmin, vmax=vmax)
+        self.heat_map.axes.contourf(self.meshgrid_x, self.meshgrid_y, resultant_wave, levels=100, cmap='RdBu')
         self.heat_map.draw()
-
-        # self.heat_map.axes.contourf(self.meshgrid_x, self.meshgrid_y, resultant_wave, levels=700, cmap='RdBu')
-        # self.heat_map.draw()
         # Normalize polar power and convert to dB
-        polar_power_db = 10 * np.log10(self.beam_profile_power / np.max(self.beam_profile_power) + 1e-12)
+        polar_power_db = 10 * np.log10(self.polar_power / np.max(self.polar_power) + 1e-12)
 
         # Update polar plot
         self.beam_profile.axes.clear()
-        self.beam_profile.axes.plot(self.beam_profile_angles - np.pi /2, polar_power_db, label="Beam Pattern")
+        self.beam_profile.axes.plot(self.angles - np.pi /2, polar_power_db, label="Beam Pattern")
         self.beam_profile.axes.set_theta_zero_location("N")
         self.beam_profile.axes.set_theta_direction(-1)  # Clockwise
         # ax_polar.plot(angles + np.pi / 2, polar_power_db)  # Add π/2 to rotate
@@ -256,7 +262,4 @@ if __name__ == "__main__":
     apply_stylesheet(app, "dark_purple.xml")
     window = Main()
     window.show()
-    plt.tight_layout()
-    plt.show()
-
     sys.exit(app.exec_())

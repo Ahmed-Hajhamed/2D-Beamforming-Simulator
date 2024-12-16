@@ -13,17 +13,17 @@ phased_arrays = [
         "steering_angle": 0,  # Degrees
         "position": [0, 0],
     }
-    # ,
-    # {
-    #     "type": "curved",
-    #     "num_elements": 16,
-    #     "frequencies": [0.8, 1.2],
-    #     "wavelengths": [1.25, 1.0],
-    #     "steering_angle": -60,
-    #     "position": [1.5, 1.0],
-    #     "radius": 1.0,
-    #     "arc_angle": 120,  # Degrees
-    # }
+    ,
+    {
+        "type": "curved",
+        "num_elements": 16,
+        "frequencies": [0.8, 1.2],
+        "wavelengths": [1.25, 1.0],
+        "steering_angle": -60,
+        "position": [1.5, 1.0],
+        "radius": 1.0,
+        "arc_angle": 120,  # Degrees
+    }
 ]
 # Receiver positions
 receivers = [(-1, 1), (1, -1), (-2, 2), (2, -2)]

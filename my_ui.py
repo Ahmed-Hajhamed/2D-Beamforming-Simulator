@@ -1,18 +1,14 @@
 from email.charset import QP
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QGridLayout, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QFrame, QLineEdit, QRadioButton,
-    QPushButton, QComboBox, QSlider, QFileDialog, QSpacerItem, QSizePolicy, QGraphicsScene, QCheckBox, QTabWidget
+     QGridLayout, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QFrame, QLineEdit, QRadioButton,
+    QPushButton, QComboBox, QSlider
 )
 from PyQt5.QtGui import QIntValidator
 from PyQt5.QtCore import Qt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
-import sys
 import numpy as np
-from qt_material import apply_stylesheet
 
-from tenacity import retry
 
 class beam_Plot(FigureCanvas):
     def __init__(self, linear = True, parent=None, width=4, height=3, dpi=100):
@@ -21,8 +17,6 @@ class beam_Plot(FigureCanvas):
             self.axes = self.fig.add_subplot(111)
         else:
             self.axes = self.fig.add_subplot(111, projection='polar')
-        # self.no_label = True 
-        # self.vmin, self.vmax= 0, 0
         super().__init__(self.fig)
 
 
@@ -53,6 +47,7 @@ class ui(object):
         v_layout_of_paramet.addLayout(h_layout_of_senario)
 
         self.current_arrays_combo_box = QComboBox()
+        self.current_arrays_combo_box.addItem("Add Array")
         self.button_of_add_new_array = QPushButton("Add Array")
         h_layout_current_array = create_layout_of_parameter( self.button_of_add_new_array, self.current_arrays_combo_box)
         v_layout_of_paramet.addLayout(h_layout_current_array)
@@ -86,10 +81,10 @@ class ui(object):
         h_layout_of_frequencis = create_layout_of_parameter(self.label_frequencies, self.frequencies_line_edit)
         v_layout_of_paramet.addLayout(h_layout_of_frequencis)
 
-        # self.frequencies_line_edit = QLineEdit()
-        # self.label_frequencies = create_label("Wave Length")
-        # h_layout_of_frequencis = create_layout_of_parameter(self.label_frequencies, self.frequencies_line_edit)
-        # v_layout_of_paramet.addLayout(h_layout_of_frequencis)
+        # self.wavelengths_line_edit = QLineEdit()
+        # self.label_wavelengths = create_label("Wavelengths")
+        # h_layout_of_wavelengths = create_layout_of_parameter(self.label_wavelengths, self.wavelengths_line_edit)
+        # v_layout_of_paramet.addLayout(h_layout_of_wavelengths)
 
         self.array_position_x_line_edit = create_line_edit(Maximum=100, Minimum= -100)
         self.array_position_y_line_edit = create_line_edit(Maximum=100)
@@ -131,6 +126,7 @@ class ui(object):
         v_layout_of_reciver_parameter = QVBoxLayout()
 
         self.current_recivers_combo_box = QComboBox()
+        self.current_recivers_combo_box.addItem("Add Receiver")
         self.button_of_add_new_reciver = QPushButton("Add Reciver")
         h_layout_current_reciver = create_layout_of_parameter(self.button_of_add_new_reciver, self.current_recivers_combo_box)
         v_layout_of_reciver_parameter.addLayout(h_layout_current_reciver)

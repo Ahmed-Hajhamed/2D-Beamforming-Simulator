@@ -41,7 +41,8 @@ class PhasedArray():
                 np.array([self.radius * np.sin(angle), self.radius * np.cos(angle)]) for angle in angles
             ]
 
-        self.source_positions = np.array([pos + np.array([self.position[0], self.position[1]]) for pos in self.source_positions])
+        # self.source_positions = np.array([pos + np.array([self.position[0], self.position[1]]) for pos in self.source_positions])
+        self.source_positions = np.array([pos + self.position for pos in self.source_positions])
 
         self.distances = [ 
             np.sqrt((self.mesh_grid[0] - pos[0])**2 + (self.mesh_grid[1] - pos[1])**2) for pos in self.source_positions
