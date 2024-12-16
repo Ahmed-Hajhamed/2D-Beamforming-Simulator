@@ -8,10 +8,25 @@ from PyQt5.QtCore import Qt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 import numpy as np
-
+gray_style = {
+    'axes.facecolor': '2E2E2E',    # Dark gray background for axes
+    'figure.facecolor': '31363b',  # Dark gray background for the figure
+    'axes.edgecolor': 'white',      # White edges for axes
+    'axes.labelcolor': 'white',     # White labels
+    'xtick.color': 'white',         # White tick marks on x-axis
+    'ytick.color': 'white',         # White tick marks on y-axis
+    'text.color': 'white',          # White text
+    'grid.color': '#444444',        # Slightly lighter grid lines
+    'grid.linestyle': '--',         # Dashed grid lines
+    'lines.color': 'cyan',          # Default line color
+    'patch.edgecolor': 'white',     # Edge color for patches
+    'legend.facecolor': '#4C4C4C',  # Darker gray background for legends
+    'legend.edgecolor': 'white',    # White edges for legends
+}
+plt.style.use(gray_style)
 
 class beam_Plot(FigureCanvas):
-    def __init__(self, linear = True, parent=None, width=4, height=3, dpi=100):
+    def __init__(self, linear = True, parent=None, width=7.5, height=4, dpi=100):
         self.fig = plt.figure(figsize=(width, height), dpi=dpi)
         if linear:
             self.axes = self.fig.add_subplot(111)
@@ -31,10 +46,6 @@ class ui(object):
         h_main_layout = QHBoxLayout()
         ############################################################
         v_layout_of_paramet = QVBoxLayout()
-        # spacer = QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Fixed)
-        # v_layout_of_paramet.addItem(spacer)
-        # v_layout_of_paramet.setStrech(1)
-        # v_layout_of_paramet.setSpacing(15)
         
         self.combo_box_of_senario = QComboBox()
         self.combo_box_of_senario.addItem("5G")
@@ -74,7 +85,6 @@ class ui(object):
         self.label_of_element_spacing_vlaue = create_label(str(self.slider_of_element_spacing.value())+" λ")
         self.h_layout_element_spacing = create_layout_of_parameter(self.label_of_element_spacing, self.slider_of_element_spacing, self.label_of_element_spacing_vlaue)
         v_layout_of_paramet.addLayout(self.h_layout_element_spacing)
-
 
         self.frequencies_line_edit = create_line_edit(Maximum=100)
         self.label_frequencies = create_label("Frequecies")
@@ -122,7 +132,7 @@ class ui(object):
         self.remove_array_button = QPushButton("Remove")
         h_layout_of_save_remove = create_layout_of_parameter(self.save_button, self.remove_array_button)
         v_layout_of_paramet.addLayout(h_layout_of_save_remove)
-        ##################################################
+
         v_layout_of_reciver_parameter = QVBoxLayout()
 
         self.current_recivers_combo_box = QComboBox()
@@ -130,12 +140,6 @@ class ui(object):
         self.button_of_add_new_reciver = QPushButton("Add Reciver")
         h_layout_current_reciver = create_layout_of_parameter(self.button_of_add_new_reciver, self.current_recivers_combo_box)
         v_layout_of_reciver_parameter.addLayout(h_layout_current_reciver)
-
-        # self.reciver_number = QComboBox()
-        # self.reciver_number.addItem("Add Array")
-        # self.label_of_reciver_number = create_label("Reciver")
-        # h_layout_of_reciver_number = create_layout_of_parameter(self.label_of_reciver_number, self.reciver_number)
-        # v_layout_of_reciver_parameter.addLayout(h_layout_of_reciver_number)
 
         self.reciver_position_x = create_line_edit(Maximum=100, Minimum= -100)
         self.reciver_position_y = create_line_edit(Maximum=100)
@@ -155,9 +159,7 @@ class ui(object):
         self.remove_button_of_reciver = QPushButton("Remove")
         h_layout_of_save_remove_of_reciver = create_layout_of_parameter(self.save_button_of_reciver, self.remove_button_of_reciver)
         v_layout_of_reciver_parameter.addLayout(h_layout_of_save_remove_of_reciver)
-        
-        
-        
+                
         v_layout_input =QVBoxLayout()
         
         v_layout_input.addLayout(v_layout_of_paramet)
@@ -167,54 +169,10 @@ class ui(object):
         
         v_layout_input.addLayout(v_layout_of_reciver_parameter)
 
-        # v_layout_input.addStretch()
-
         h_main_layout.addLayout(v_layout_input)
-        #####################################################################
         
         self.sperator_between_input_and_output = creat_separator("v")
         h_main_layout.addWidget(self.sperator_between_input_and_output)
-        self.grid_layout_of_change_info  = QGridLayout()
-
-
-        self.slider_for_change_1 = slider_creator(Maximum=10)
-        self.label_of_slider_for_change_transimter_number = QLabel("text label")
-        self.label_of_slider_for_change_transimter_number_value = QLabel(str(self.slider_for_change_1.value()))
-        self.grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_transimter_number, 0, 0)
-        self.grid_layout_of_change_info.addWidget(self.slider_for_change_1, 0, 1)
-        self.grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_transimter_number_value, 0, 2)
-        
-
-        self.slider_for_change_2 = slider_creator()
-        self.label_of_slider_for_change_2 = QLabel("text label")
-        self.label_of_slider_for_change_2_value = QLabel(str(self.slider_for_change_2.value()))
-        self.grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_2, 1, 0)
-        self.grid_layout_of_change_info.addWidget(self.slider_for_change_2, 1, 1)
-        self.grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_2_value, 1, 2)
-
-        self.slider_for_change_3 = slider_creator()
-        self.label_of_slider_for_change_3 = QLabel("text label")
-        self.label_of_slider_for_change_3_value = QLabel(str(self.slider_for_change_3.value()))
-        self.grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_3, 2, 0)
-        self.grid_layout_of_change_info.addWidget(self.slider_for_change_3, 2, 1)
-        self.grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_3_value, 2, 2)
-
-        self.slider_for_change_4 = slider_creator()
-        self.label_of_slider_for_change_4 = QLabel("text label")
-        self.label_of_slider_for_change_4_value = QLabel(str(self.slider_for_change_4.value()))
-        self.grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_4, 3, 0)
-        self.grid_layout_of_change_info.addWidget(self.slider_for_change_4, 3, 1)
-        self.grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_4_value, 3, 2)
-
-        self.slider_for_change_5 = slider_creator()
-        self.label_of_slider_for_change_5 = QLabel("text label")
-        self.label_of_slider_for_change_5_value = QLabel(str(self.slider_for_change_5.value()))
-        self.grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_5, 4, 0)
-        self.grid_layout_of_change_info.addWidget(self.slider_for_change_5, 4, 1)
-        self.grid_layout_of_change_info.addWidget(self.label_of_slider_for_change_5_value, 4, 2)
-
-        h_main_layout.addLayout(self.grid_layout_of_change_info)
-        #####################################################################
         
         grid_layout_of_output = QGridLayout()
 
@@ -227,12 +185,10 @@ class ui(object):
         self.heat_map = beam_Plot()
         grid_layout_of_output.addWidget(self.heat_map, 0, 0)
 
-        #######################################################################
         grid_of_array_info = QGridLayout()
         
         self.label_title = QLabel("Array information")
         grid_of_array_info.addWidget(self.label_title, 0, 0)
-
 
         self.label_info_array = QLabel("Array Name : ")
         self.label_info_array_value = QComboBox()
@@ -272,28 +228,19 @@ class ui(object):
         self.heat_map.axes.set_ylabel("Y Position (wavelengths)")
         self.heat_map.axes.axis('equal')
 
-        # Configure polar plot
-        self.beam_profile.axes.set_title("Polar Beam Pattern", va='bottom')
-        self.beam_profile.axes.set_ylim([-40, 0])  # Decibel range
+        self.beam_profile.axes.set_ylim([-40, 0]) 
+
         self.transmiters_recivers_plotter.axes.set_title("Array Elements and Receivers")
-        self.transmiters_recivers_plotter.axes.set_xlabel("X Position (wavelengths)")
-        self.transmiters_recivers_plotter.axes.set_ylabel("Y Position (wavelengths)")
+        self.transmiters_recivers_plotter.axes.set_xlabel("X Position")
+        self.transmiters_recivers_plotter.axes.set_ylabel("Y Position")
         self.transmiters_recivers_plotter.axes.grid(True)
         self.transmiters_recivers_plotter.axes.axis('equal')
 
         h_main_layout.addLayout(grid_layout_of_output)
 
-        #######################################################################
-
         container = QWidget()
         container.setLayout(h_main_layout)
         MainWindow.setCentralWidget(container)
-    
-    def save_array(self):
-        pass
-
-    def save_reciver(self):
-        pass
 
     def change_type(self):
         if self.radio_button_of_linear.isChecked():
@@ -311,53 +258,6 @@ class ui(object):
         if index != -1:  # Check if the text exists
             combo_box.removeItem(index)  # Remove the item
 
-
-    def slider_creator(self, Mainwindow, number_of_slider):  ### not used yet###
-        self.number_of_sliders = number_of_slider 
-        band_layout = QGridLayout()
-        self.gain = [1] * self.number_of_sliders
-        self.phase_shifts_sliders_values.clear()
-        for i in range(self.number_of_sliders):
-            slider = QSlider(Qt.Horizontal)
-            slider.setMinimum(-90)
-            slider.setMaximum(90)
-            slider.setValue(int(np.degrees(Mainwindow.current_array.phase_shifts[i][0])))
-            slider.setFixedWidth(100)
-            self.phase_shifts_sliders_values.append(slider.value())
-            slider.valueChanged.connect(lambda value, idx=i: Mainwindow.update_phase_shifts(value, idx))
-            
-            label = QLabel(str(f"Transmitter {i + 1}"))
-            label.setObjectName(f"Transmitter_{i+1}_label")
-            label.setFixedHeight(30)
-            
-            band_layout.addWidget(label, i, 0, 1, 1)
-            band_layout.addWidget(slider, i, 1, 1, 1)
-        
-        return band_layout
-    
-    def clear_layout(self, layout):
-        # Iterate and remove widgets
-        while layout.count():
-            item = layout.takeAt(0)  # Take the first item
-            widget = item.widget()
-            if widget is not None:
-                widget.deleteLater()  # Delete the widget
-            else:
-                # If it's a layout, clear it recursively
-                sub_layout = item.layout()
-                if sub_layout is not None:
-                    self.clear_layout_recursive(sub_layout)
-
-    def clear_layout_recursive(self, layout):
-        while layout.count():
-            item = layout.takeAt(0)
-            widget = item.widget()
-            if widget is not None:
-                widget.deleteLater()
-            else:
-                sub_layout = item.layout()
-                if sub_layout is not None:
-                    self.clear_layout_recursive(sub_layout)
 
 def create_line_edit(Maximum=None, Minimum=0, place_holder = None):
     line_edit = QLineEdit()
