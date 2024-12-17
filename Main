@@ -214,19 +214,19 @@ class Main(QMainWindow, UI.ui):
         if self.array_info_combobox.currentText() in self.arrays:
             array = self.arrays[self.array_info_combobox.currentText()]
             self.label_of_which_type.setText(str(array.array_type))
-            self.label_of_transmiters_number_value.setText(str(array.number_of_elements))
+            self.label_info_number_of_transmiter_value.setText(str(array.number_of_elements))
             temp_string = "".join(","+str(i) for i in array.frequencies)
             temp_string = temp_string[1:]
-            self.label_info_frequencies_value.setText(temp_string)
-            self.label_steering_angle_value.setText(str(np.degrees(array.steering_angle)))
+            self.label_info_frequencies_value.setText(temp_string + "Hz")
+            self.label_steering_angle_value.setText(str(np.degrees(array.steering_angle)) + "Degrees")
             if array.array_type == "Linear":
-                self.label_of_element_spacing_vlaue.setText(str(array.elements_spacing))
+                self.label_of_element_spacing_vlaue.setText(str(array.elements_spacing) + "λ")
                 self.label_info_raduis_value.setText(".............")
                 self.label_arc_angle_value.setText(".............")
             else:
                 self.label_of_element_spacing_vlaue.setText(".............")
-                self.label_info_raduis_value.setText(str(array.radius))
-                self.label_arc_angle_value.setText(str(np.degrees(array.arc_angle)))
+                self.label_info_raduis_value.setText(str(array.radius) + "m")
+                self.label_arc_angle_value.setText(str(np.degrees(array.arc_angle)) + "Degrees")
 
     def update(self, frame):
         time = frame / 10.0
