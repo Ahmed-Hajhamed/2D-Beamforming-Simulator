@@ -78,14 +78,16 @@ class ui(object):
         self.label_of_transmiters_number  = create_label("Transmitters")
         self.label_of_transmiters_number_value = create_label(str(self.slider_of_transmiters_number.value()))
         h_layout_transmiters_number = create_layout_of_parameter(self.label_of_transmiters_number, self.slider_of_transmiters_number, self.label_of_transmiters_number_value)
+        self.slider_of_transmiters_number.valueChanged.connect(self.update_transimater_value_slider_label)
         v_layout_of_paramet.addLayout(h_layout_transmiters_number)
 
         self.slider_of_element_spacing = slider_creator(Maximum=8, Minimum=1)
         self.slider_of_element_spacing.setValue(1)
         self.label_of_element_spacing  = create_label("Elements Spacing")
-        self.label_of_element_spacing_vlaue = create_label(str(self.slider_of_element_spacing.value())+" λ")
+        self.label_of_element_spacing_vlaue = create_label(str(self.slider_of_element_spacing.value() * 0.5)+" λ")
         self.h_layout_element_spacing = create_layout_of_parameter(self.label_of_element_spacing, self.slider_of_element_spacing, 
                                                                    self.label_of_element_spacing_vlaue)
+        self.slider_of_element_spacing.valueChanged.connect(self.update_element_spacing_value_slider_label)
         v_layout_of_paramet.addLayout(self.h_layout_element_spacing)
 
         self.frequencies_line_edit = create_line_edit()
@@ -110,6 +112,7 @@ class ui(object):
         self.label_steering_angle = create_label("Steering Angle")
         self.label_steering_angle_value = create_label(str(self.slider_of_steering_angle.value())+"˚")
         h_layout_of_steering_angle = create_layout_of_parameter(self.label_steering_angle, self.slider_of_steering_angle, self.label_steering_angle_value)
+        self.slider_of_steering_angle.valueChanged.connect(self.update_steering_angle_slider_label)
         v_layout_of_paramet.addLayout(h_layout_of_steering_angle)
 
         self.radius_line_edit = create_line_edit(Maximum=100)
@@ -122,6 +125,7 @@ class ui(object):
         self.label_arc_angle= create_label("Arc Angle")
         self.label_arc_angle_value = create_label(str(self.slider_of_arc_angle.value())+"˚")
         self.h_layout_of_arc_angle = create_layout_of_parameter(self.label_arc_angle, self.slider_of_arc_angle, self.label_arc_angle_value)
+        self.slider_of_arc_angle.valueChanged.connect(self.update_arc_angle_slider_label)
         v_layout_of_paramet.addLayout(self.h_layout_of_arc_angle)
         hide_layout(self.h_layout_of_arc_angle)
         
@@ -265,6 +269,18 @@ class ui(object):
         if index != -1:  # Check if the text exists
             combo_box.removeItem(index)  # Remove the item
 
+    def update_transimater_value_slider_label(self):
+        self.label_of_transmiters_number_value.setText(str(self.slider_of_transmiters_number.value()))
+        
+
+    def update_element_spacing_value_slider_label(self):
+        self.label_of_element_spacing_vlaue.setText(str(self.slider_of_element_spacing.value() * 0.5)+" λ")
+
+    def update_steering_angle_slider_label(self):
+        self.label_steering_angle_value.setText(str(self.slider_of_steering_angle.value())+"˚")
+
+    def update_arc_angle_slider_label(self):
+        self.label_arc_angle_value.setText(str(self.slider_of_arc_angle.value())+"˚")
 
 def create_line_edit(Maximum=None, Minimum=0, place_holder = None):
     line_edit = QLineEdit()
