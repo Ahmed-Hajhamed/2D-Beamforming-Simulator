@@ -14,7 +14,6 @@ class Main(QMainWindow, UI.ui):
         self.setupUi(self)
         self.receivers_ = {}
         self.arrays = {}
-        self.distances = None
         x = np.linspace(-20, 20, 200)
         y = np.linspace( 0, 40, 200)
         self.meshgrid_x, self.meshgrid_y = np.meshgrid(x, y) 
@@ -39,7 +38,7 @@ class Main(QMainWindow, UI.ui):
         self.receiver_texts = []
         self.receivers_positions = []
         self.frame = 10
-        self.max_frames = 1000 
+        self.max_frames = 100 
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_all)  
         self.timer.start(50) 

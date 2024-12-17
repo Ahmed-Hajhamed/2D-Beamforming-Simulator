@@ -49,7 +49,7 @@ class ui(object):
         
         self.combo_box_of_senario = QComboBox()
         self.combo_box_of_senario.addItem("5G")
-        self.combo_box_of_senario.addItem("Ultrasoundx")
+        self.combo_box_of_senario.addItem("Ultrasound")
         self.combo_box_of_senario.addItem("Tumor Ablation")
 
         self.applay_the_senario = QPushButton("Apply")
@@ -74,7 +74,7 @@ class ui(object):
         v_layout_of_paramet.addLayout(h_layout_of_select)
 
 
-        self.slider_of_transmiters_number = slider_creator(Maximum=16, Minimum=1)
+        self.slider_of_transmiters_number = slider_creator(Maximum=64, Minimum=1)
         self.label_of_transmiters_number  = create_label("Transmitters")
         self.label_of_transmiters_number_value = create_label(str(self.slider_of_transmiters_number.value()))
         h_layout_transmiters_number = create_layout_of_parameter(self.label_of_transmiters_number, self.slider_of_transmiters_number, self.label_of_transmiters_number_value)
