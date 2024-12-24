@@ -96,6 +96,7 @@ class ui(object):
         v_layout_of_paramet.addLayout(self.h_layout_element_spacing)
 
         self.frequencies_line_edit = create_line_edit()
+        self.frequencies_line_edit.setText("1")
         self.label_frequencies = create_label("Frequecies")
         h_layout_of_frequencis = create_layout_of_parameter(self.label_frequencies, self.frequencies_line_edit)
         v_layout_of_paramet.addLayout(h_layout_of_frequencis)
@@ -107,6 +108,8 @@ class ui(object):
 
         self.array_position_x_line_edit = create_line_edit(Maximum=100, Minimum= -100)
         self.array_position_y_line_edit = create_line_edit(Maximum=100)
+        self.array_position_x_line_edit.setText("0")
+        self.array_position_y_line_edit.setText("0")
         self.label_position = create_label("Position")
         self.label_position_x = create_label("X")
         self.label_position_y = create_label("Y")
@@ -121,6 +124,7 @@ class ui(object):
         v_layout_of_paramet.addLayout(h_layout_of_steering_angle)
 
         self.radius_line_edit = create_line_edit(Maximum=100)
+        self.radius_line_edit.setText("1")
         self.label_of_radius = create_label("Radius")
         self.h_layout_of_Radius = create_layout_of_parameter(self.label_of_radius, self.radius_line_edit)
         v_layout_of_paramet.addLayout(self.h_layout_of_Radius)
@@ -135,6 +139,7 @@ class ui(object):
         hide_layout(self.h_layout_of_arc_angle)
         
         self.array_name_line_edit = QLineEdit()
+        self.array_name_line_edit.setText("array")
         self.label_of_array_name = create_label("Array Name")
         h_layout_of_array_name = create_layout_of_parameter(self.label_of_array_name, self.array_name_line_edit)
         v_layout_of_paramet.addLayout(h_layout_of_array_name)

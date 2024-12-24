@@ -29,9 +29,16 @@ class Main(QMainWindow, UI.ui):
         self.current_arrays_combo_box.currentTextChanged.connect(self.change_current_array)
         self.current_recivers_combo_box.currentTextChanged.connect(self.change_current_receiver)
         self.array_info_combobox.currentTextChanged.connect(self.display_array_info)
-        self.button_of_add_new_array.clicked.connect(self.clear_array_inputs)
         self.button_of_add_new_reciver.clicked.connect(self.clear_receiver_inputs)
         self.applay_the_senario.clicked.connect(self.set_scenario)
+        self.slider_of_arc_angle.valueChanged.connect(self.add_update_array)
+        self.slider_of_element_spacing.valueChanged.connect(self.add_update_array)
+        self.slider_of_steering_angle.valueChanged.connect(self.add_update_array)
+        self.slider_of_transmiters_number.valueChanged.connect(self.add_update_array)
+        self.radius_line_edit.textChanged.connect(self.add_update_array)
+        self.frequencies_line_edit.textChanged.connect(self.add_update_array)
+        self.array_position_x_line_edit.textChanged.connect(self.add_update_array)
+        self.array_position_y_line_edit.textChanged.connect(self.add_update_array)
         self.beam_profile_x = np.linspace(-20, 20, 500)
         self.beam_profile_y = np.zeros_like(self.beam_profile_x)
         self.beam_profile_angles = np.linspace(0, 2 * np.pi, 360)
@@ -76,7 +83,6 @@ class Main(QMainWindow, UI.ui):
         self.current_recivers_combo_box.addItems(receivers_names)
         self.current_recivers_combo_box.setCurrentText(receivers_names[-1])
         self.change_current_receiver()
-        
         self.draw_arrays_and_receivers()
 
     def remove_scenario(self):
@@ -95,7 +101,12 @@ class Main(QMainWindow, UI.ui):
     def add_update_array(self):
         name = self.array_name_line_edit.text()
         number_of_elements = self.slider_of_transmiters_number.value()
-        frequencies_text = self.frequencies_line_edit.text()
+        if self.frequencies_line_edit.text().strip() == "":
+            frequencies_text = "1"
+        else:
+            frequencies_text = self.frequencies_line_edit.text()
+        if frequencies_text.endswith(","):
+            frequencies_text = frequencies_text[:-1]
         frequencies_text = frequencies_text.split(",")
         frequencies = []
 
@@ -103,7 +114,10 @@ class Main(QMainWindow, UI.ui):
             frequencies.append(int(frequencies_text[i]))
 
         steering_angle = self.slider_of_steering_angle.value()
-        position = [int(self.array_position_x_line_edit.text()), int(self.array_position_y_line_edit.text())]
+        if self.array_position_x_line_edit.text().strip() == "" or self.array_position_y_line_edit.text().strip() == "":
+            position = [0,0]
+        else:
+            position = [int(self.array_position_x_line_edit.text()), int(self.array_position_y_line_edit.text())]
 
         if self.radio_button_of_linear.isChecked():
             array_type = "Linear"
@@ -122,8 +136,10 @@ class Main(QMainWindow, UI.ui):
         elif self.radio_button_of_curve.isChecked():
             array_type = "Curved"
             arc_angle = self.slider_of_arc_angle.value()
-            radius = int(self.radius_line_edit.text())
-          
+            if self.radius_line_edit.text().strip() == "":
+                radius = 1
+            else:
+                radius = int(self.radius_line_edit.text())     
             if self.current_arrays_combo_box.currentText() in self.arrays:
                 old_name = self.current_array.name
                 self.current_array.start_array(name, array_type, number_of_elements, frequencies, steering_angle, position, self.meshgrid_x, 
@@ -200,9 +216,9 @@ class Main(QMainWindow, UI.ui):
             self.slider_of_transmiters_number.setValue(self.current_array.number_of_elements)
             self.array_position_x_line_edit.setText(str(self.current_array.position[0]))
             self.array_position_y_line_edit.setText(str(self.current_array.position[1]))
-            temp_string = "".join(","+str(i) for i in self.current_array.frequencies)
+            temp_string = "".join("," + str(i) for i in self.current_array.frequencies)
             temp_string = temp_string[1:]
-            self.frequencies_line_edit.setText(temp_string)
+            # self.frequencies_line_edit.setText(temp_string)
 
             if self.current_array.array_type == "Linear":
                 self.radio_button_of_linear.setChecked(True)
@@ -239,6 +255,7 @@ class Main(QMainWindow, UI.ui):
         self.slider_of_transmiters_number.setValue(8)
         self.slider_of_element_spacing.setValue(1)
         self.slider_of_arc_angle.setValue(0)
+        self.slider_of_steering_angle.setValue(0)
         self.radius_line_edit.clear()
         self.array_name_line_edit.clear()
         self.frequencies_line_edit.clear()
