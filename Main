@@ -247,6 +247,7 @@ class Main(QMainWindow, UI.ui):
             self.current_arrays_combo_box.removeItem(self.current_arrays_combo_box.findText(array_name))
             self.array_info_combobox.removeItem(self.array_info_combobox.findText(array_name))
         self.draw_arrays_and_receivers()
+        self.clear_array_inputs()
         self.update(self.frame)
         
     def remove_receiver(self, receiver_name= None):
@@ -258,6 +259,7 @@ class Main(QMainWindow, UI.ui):
             del self.receivers_[receiver_name]
             self.current_recivers_combo_box.removeItem(self.current_recivers_combo_box.findText(receiver_name))
         self.draw_arrays_and_receivers()
+        self.clear_receiver_inputs()
 
     def clear_array_inputs(self):
         self.current_arrays_combo_box.setCurrentIndex(0)
