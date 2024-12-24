@@ -8,14 +8,16 @@ from  PhasedArray import Array
 from Receiver import Receiver
 import UI
 import matplotlib.pyplot as plt
+from Scenarios import arrays_scenarios, receivers_scenarios, five_G, tumor_ablation, ultrasound
+
 class Main(QMainWindow, UI.ui):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
         self.receivers_ = {}
         self.arrays = {}
-        x = np.linspace(-20, 20, 200)
-        y = np.linspace( 0, 40, 200)
+        x = np.linspace(-20, 20, 100)
+        y = np.linspace( 0, 40, 100)
         self.meshgrid_x, self.meshgrid_y = np.meshgrid(x, y) 
         self.meshgrid = np.array([self.meshgrid_x, self.meshgrid_y])
         self.save_button.clicked.connect(self.add_update_array)
@@ -29,6 +31,7 @@ class Main(QMainWindow, UI.ui):
         self.array_info_combobox.currentTextChanged.connect(self.display_array_info)
         self.button_of_add_new_array.clicked.connect(self.clear_array_inputs)
         self.button_of_add_new_reciver.clicked.connect(self.clear_receiver_inputs)
+        self.applay_the_senario.clicked.connect(self.set_scenario)
         self.beam_profile_x = np.linspace(-20, 20, 500)
         self.beam_profile_y = np.zeros_like(self.beam_profile_x)
         self.beam_profile_angles = np.linspace(0, 2 * np.pi, 360)
@@ -39,19 +42,55 @@ class Main(QMainWindow, UI.ui):
         self.receivers_positions = []
         self.frame = 10
         self.max_frames = 100 
+        self.update_cheaker = 0
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_all)  
-        self.timer.start(50) 
+        self.timer.start(1000) 
         self.angles = np.linspace(0, 2 * np.pi, 360)
         self.polar_power = np.zeros_like(self.angles)
         contour = self.heat_map.axes.contourf(self.meshgrid_x, self.meshgrid_y,
                                                np.zeros_like(self.meshgrid_x), levels=100, cmap='RdBu')  
         plt.colorbar(contour, ax=self.heat_map.axes, label='Amplitude')
 
+    def set_scenario(self):
+        scenario = self.combo_box_of_senario.currentText()
+        self.remove_scenario()
+        if scenario == "5G":
+            five_G(self.meshgrid_x, self.meshgrid_y, self.beam_profile_x, self.beam_profile_y)
+        
+        elif scenario == "Ultrasound":
+            ultrasound(self.meshgrid_x, self.meshgrid_y, self.beam_profile_x, self.beam_profile_y)
+
+        elif scenario == "Tumor Ablation":
+            tumor_ablation(self.meshgrid_x, self.meshgrid_y, self.beam_profile_x, self.beam_profile_y)
+        
+        self.arrays.update(arrays_scenarios)
+        arrays_name = [k for k in arrays_scenarios.keys()]
+        self.current_arrays_combo_box.addItems(arrays_name)
+        self.array_info_combobox.addItems(arrays_name)
+        self.current_arrays_combo_box.setCurrentText(arrays_name[-1])
+        self.array_info_combobox.setCurrentText(arrays_name[-1])
+        
+        receivers_names = [k for k in receivers_scenarios.keys()]
+        self.receivers_.update(receivers_scenarios)
+        self.current_recivers_combo_box.addItems(receivers_names)
+        self.current_recivers_combo_box.setCurrentText(receivers_names[-1])
+        self.change_current_receiver()
+        
+        self.draw_arrays_and_receivers()
+
+    def remove_scenario(self):
+        for array_name in arrays_scenarios.keys():
+            self.remove_array(array_name)
+            pass
+
+        for receiver in receivers_scenarios.keys():
+            self.remove_receiver(receiver)
 
     def update_all(self):
-        self.update(self.frame)
-        self.frame = (self.frame + 1) % self.max_frames
+        if len(self.arrays) > 0:
+            self.update(self.frame)
+            self.frame = (self.frame + 1) % self.max_frames
 
     def add_update_array(self):
         name = self.array_name_line_edit.text()
@@ -110,6 +149,8 @@ class Main(QMainWindow, UI.ui):
         self.draw_arrays_and_receivers()
 
     def add_update_receiver(self):
+        if self.reciver_position_x.text().strip() == ""or self.reciver_position_y.text().strip() == "" or self.reciver_name.text().strip()=="" :
+            return
         name = self.reciver_name.text()
         position = [int(self.reciver_position_x.text()), int(self.reciver_position_y.text())]
         if self.current_recivers_combo_box.currentText() in self.receivers_:
@@ -153,6 +194,7 @@ class Main(QMainWindow, UI.ui):
 
     def change_current_array(self):
         if self.current_arrays_combo_box.currentText()in self.arrays:
+            self.update_cheaker = len(self.arrays)+1
             self.current_array = self.arrays[self.current_arrays_combo_box.currentText()]
             self.array_name_line_edit.setText(self.current_array.name)
             self.slider_of_transmiters_number.setValue(self.current_array.number_of_elements)
@@ -170,21 +212,26 @@ class Main(QMainWindow, UI.ui):
                 self.radius_line_edit.setText(str(self.current_array.radius))
                 self.slider_of_arc_angle.setValue(int(np.degrees(self.current_array.arc_angle)))
 
-    def remove_array(self):
-        if self.current_arrays_combo_box.currentText() in self.arrays:
-            temp_array = self.arrays[self.current_arrays_combo_box.currentText()]
+    def remove_array(self, array_name = None):
+        if array_name is None:
+            array_name = self.current_arrays_combo_box.currentText()
+        if array_name in self.arrays:
+            temp_array = self.arrays[array_name]
             del temp_array
-            del self.arrays[self.current_arrays_combo_box.currentText()]
-            self.current_arrays_combo_box.removeItem(self.current_arrays_combo_box.currentIndex())
-            self.array_info_combobox.removeItem(self.array_info_combobox.currentIndex())
+            del self.arrays[array_name]
+            self.current_arrays_combo_box.removeItem(self.current_arrays_combo_box.findText(array_name))
+            self.array_info_combobox.removeItem(self.array_info_combobox.findText(array_name))
         self.draw_arrays_and_receivers()
+        self.update(self.frame)
         
-    def remove_receiver(self):
-        if self.current_recivers_combo_box.currentText() in self.receivers_:
-            temp_receiver = self.receivers_[self.current_recivers_combo_box.currentText()]
+    def remove_receiver(self, receiver_name= None):
+        if receiver_name is None:
+            receiver_name = self.current_recivers_combo_box.currentText()
+        if receiver_name in self.receivers_:
+            temp_receiver = self.receivers_[receiver_name]
             del temp_receiver
-            del self.receivers_[self.current_recivers_combo_box.currentText()]
-            self.current_recivers_combo_box.removeItem(self.current_recivers_combo_box.currentIndex())
+            del self.receivers_[receiver_name]
+            self.current_recivers_combo_box.removeItem(self.current_recivers_combo_box.findText(receiver_name))
         self.draw_arrays_and_receivers()
 
     def clear_array_inputs(self):
@@ -205,10 +252,12 @@ class Main(QMainWindow, UI.ui):
         self.reciver_name.clear()
 
     def change_current_receiver(self):
-        self.current_receiver = self.receivers_[self.current_recivers_combo_box.currentText()]
-        self.reciver_name.setText(self.current_receiver.name)
-        self.reciver_position_x.setText(str(self.current_receiver.position[0]))
-        self.reciver_position_y.setText(str(self.current_receiver.position[1]))
+        name = self.current_recivers_combo_box.currentText()
+        if name != "Add Receiver":
+            self.current_receiver = self.receivers_[self.current_recivers_combo_box.currentText()]
+            self.reciver_name.setText(self.current_receiver.name)
+            self.reciver_position_x.setText(str(self.current_receiver.position[0]))
+            self.reciver_position_y.setText(str(self.current_receiver.position[1]))
 
     def display_array_info(self):
         if self.array_info_combobox.currentText() in self.arrays:
@@ -218,15 +267,15 @@ class Main(QMainWindow, UI.ui):
             temp_string = "".join(","+str(i) for i in array.frequencies)
             temp_string = temp_string[1:]
             self.label_info_frequencies_value.setText(temp_string + "Hz")
-            self.label_steering_angle_value.setText(str(np.degrees(array.steering_angle)) + "Degrees")
+            self.label_steering_angle_value.setText(f"{int(np.degrees(array.steering_angle))}"+ "˚")
             if array.array_type == "Linear":
-                self.label_of_element_spacing_vlaue.setText(str(array.elements_spacing) + "λ")
+                self.label_of_element_spacing_vlaue.setText(f"{array.elements_spacing}" + "λ")
                 self.label_info_raduis_value.setText(".............")
                 self.label_arc_angle_value.setText(".............")
             else:
                 self.label_of_element_spacing_vlaue.setText(".............")
                 self.label_info_raduis_value.setText(str(array.radius) + "m")
-                self.label_arc_angle_value.setText(str(np.degrees(array.arc_angle)) + "Degrees")
+                self.label_arc_angle_value.setText(f"{int(np.degrees(array.arc_angle))}" + "˚")
 
     def update(self, frame):
         time = frame / 10.0
@@ -259,7 +308,8 @@ class Main(QMainWindow, UI.ui):
                         positions[:, 0] * np.cos(theta - steering_angle) +
                         positions[:, 1] * np.sin(theta - steering_angle)
                     ))
-                    self.polar_power[theta_idx] += np.abs(np.sum(steering_vector))**2
+                    if self.update_cheaker != len(self.arrays):
+                        self.polar_power[theta_idx] += np.abs(np.sum(steering_vector))**2
         for rx in self.receivers_positions:
             signal = 0
             for array in self.arrays.values():
@@ -274,18 +324,22 @@ class Main(QMainWindow, UI.ui):
             c.remove()
         self.heat_map.axes.contourf(self.meshgrid_x, self.meshgrid_y, resultant_wave, levels=100, cmap='RdBu')
         self.heat_map.draw()
-        polar_power_db = 10 * np.log10(self.polar_power / np.max(self.polar_power) + 1e-12)
 
-        self.beam_profile.axes.clear()
-        self.beam_profile.axes.plot(self.angles - np.pi /2, polar_power_db)
-        self.beam_profile.axes.set_title("Beam Pattern")
-        self.beam_profile.axes.set_theta_zero_location("N")
-        self.beam_profile.axes.set_theta_direction(-1) 
-        self.beam_profile.axes.set_theta_offset(np.pi / 2)  
-        self.beam_profile.axes.set_thetamin(-90)            
-        self.beam_profile.axes.set_thetamax(90)
-        self.beam_profile.axes.legend()
-        self.beam_profile.draw()
+        if self.update_cheaker != len(self.arrays):
+            self.update_cheaker = len(self.arrays)
+            if len(self.arrays) > 0:
+                polar_power_db = 10 * np.log10(self.polar_power / np.max(self.polar_power) + 1e-10)
+                self.beam_profile.axes.clear()
+                self.beam_profile.axes.plot(self.angles - np.pi /2, polar_power_db)
+            else:
+                self.beam_profile.axes.clear()
+            self.beam_profile.axes.set_title("Beam Pattern")
+            self.beam_profile.axes.set_theta_zero_location("N")
+            self.beam_profile.axes.set_theta_direction(-1) 
+            self.beam_profile.axes.set_theta_offset(np.pi / 2)  
+            self.beam_profile.axes.set_thetamin(-90)            
+            self.beam_profile.axes.set_thetamax(90)
+            self.beam_profile.draw()
         self.transmiters_recivers_plotter.draw()
 
 if __name__ == "__main__":

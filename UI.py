@@ -1,6 +1,5 @@
-from email.charset import QP
 from PyQt5.QtWidgets import (
-     QGridLayout, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QFrame, QLineEdit, QRadioButton,
+    QGridLayout, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QFrame, QLineEdit, QRadioButton,
     QPushButton, QComboBox, QSlider
 )
 from PyQt5.QtGui import QIntValidator
@@ -32,6 +31,12 @@ class beam_Plot(FigureCanvas):
             self.axes = self.fig.add_subplot(111)
         else:
             self.axes = self.fig.add_subplot(111, projection='polar')
+            self.axes.set_title("Beam Pattern")
+            self.axes.set_theta_zero_location("N")
+            self.axes.set_theta_direction(-1) 
+            self.axes.set_theta_offset(np.pi / 2)  
+            self.axes.set_thetamin(-90)            
+            self.axes.set_thetamax(90)
         super().__init__(self.fig)
 
 
@@ -277,7 +282,7 @@ class ui(object):
         self.label_of_element_spacing_vlaue.setText(str(self.slider_of_element_spacing.value() * 0.5)+" λ")
 
     def update_steering_angle_slider_label(self):
-        self.label_steering_angle_value.setText(str(self.slider_of_steering_angle.value())+"˚")
+        self.label_steering_angle_value.setText(f"{int(self.slider_of_steering_angle.value())}"+"˚")
 
     def update_arc_angle_slider_label(self):
         self.label_arc_angle_value.setText(str(self.slider_of_arc_angle.value())+"˚")
@@ -292,7 +297,7 @@ def create_line_edit(Maximum=None, Minimum=0, place_holder = None):
 
 def create_label(text:str):
     label = QLabel(text)
-    label.setFixedHeight(60)
+    label.setFixedHeight(40)
     return label
 
 def creat_separator(type:str):
