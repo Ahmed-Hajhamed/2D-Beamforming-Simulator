@@ -83,14 +83,22 @@ class Main(QMainWindow, UI.ui):
         self.current_recivers_combo_box.addItems(receivers_names)
         self.current_recivers_combo_box.setCurrentText(receivers_names[-1])
         self.change_current_receiver()
+        
         self.draw_arrays_and_receivers()
 
     def remove_scenario(self):
-        for array_name in arrays_scenarios.keys():
-            self.remove_array(array_name)
-            pass
+        # for array_name in arrays_scenarios.keys():
+        #     self.remove_array(array_name)
 
-        for receiver in receivers_scenarios.keys():
+        # for receiver in receivers_scenarios.keys():
+        #     self.remove_receiver(receiver)
+        
+        arrays = [array for array in self.arrays.keys()]
+        receivers = [receiver for receiver in self.receivers_]
+        for array in arrays:
+            self.remove_array(array)
+
+        for receiver in receivers:
             self.remove_receiver(receiver)
 
     def update_all(self):
@@ -163,6 +171,7 @@ class Main(QMainWindow, UI.ui):
         self.array_info_combobox.setCurrentText(name)
         self.change_current_array()
         self.draw_arrays_and_receivers()
+        self.display_array_info()
 
     def add_update_receiver(self):
         if self.reciver_position_x.text().strip() == ""or self.reciver_position_y.text().strip() == "" or self.reciver_name.text().strip()=="" :
@@ -229,7 +238,7 @@ class Main(QMainWindow, UI.ui):
                 self.slider_of_arc_angle.setValue(int(np.degrees(self.current_array.arc_angle)))
 
     def remove_array(self, array_name = None):
-        if array_name is None:
+        if not array_name:
             array_name = self.current_arrays_combo_box.currentText()
         if array_name in self.arrays:
             temp_array = self.arrays[array_name]
@@ -241,7 +250,7 @@ class Main(QMainWindow, UI.ui):
         self.update(self.frame)
         
     def remove_receiver(self, receiver_name= None):
-        if receiver_name is None:
+        if not receiver_name :
             receiver_name = self.current_recivers_combo_box.currentText()
         if receiver_name in self.receivers_:
             temp_receiver = self.receivers_[receiver_name]
@@ -279,20 +288,44 @@ class Main(QMainWindow, UI.ui):
     def display_array_info(self):
         if self.array_info_combobox.currentText() in self.arrays:
             array = self.arrays[self.array_info_combobox.currentText()]
+
             self.label_of_which_type.setText(str(array.array_type))
+            
             self.label_info_number_of_transmiter_value.setText(str(array.number_of_elements))
+            
             temp_string = "".join(","+str(i) for i in array.frequencies)
             temp_string = temp_string[1:]
             self.label_info_frequencies_value.setText(temp_string + "Hz")
-            self.label_steering_angle_value.setText(f"{int(np.degrees(array.steering_angle))}"+ "˚")
+            
+            self.label_info_steering_angle_value.setText(f"{int(np.degrees(array.steering_angle))}"+ "˚")
+
+            self.label_info_positoin_value.setText(f"{array.position[0]}x {array.position[1]}y")
+            
             if array.array_type == "Linear":
-                self.label_of_element_spacing_vlaue.setText(f"{array.elements_spacing}" + "λ")
+                self.label_info_elements_spacing.show()
+                self.label_info_elements_spacing_value.show()
+                self.label_info_elements_spacing_value.setText(f"{array.elements_spacing}" + "λ")
+
                 self.label_info_raduis_value.setText(".............")
-                self.label_arc_angle_value.setText(".............")
+                self.label_info_raduis.hide()
+                self.label_info_raduis_value.hide()
+                
+                self.label_info_arc_angle_value.setText(".............")
+                self.label_info_arc_angle.hide()
+                self.label_info_arc_angle_value.hide()
+
             else:
-                self.label_of_element_spacing_vlaue.setText(".............")
+                self.label_info_elements_spacing.hide()
+                self.label_info_elements_spacing_value.hide()
+                self.label_info_elements_spacing_value.setText(".............")
+
                 self.label_info_raduis_value.setText(str(array.radius) + "m")
-                self.label_arc_angle_value.setText(f"{int(np.degrees(array.arc_angle))}" + "˚")
+                self.label_info_raduis.show()
+                self.label_info_raduis_value.show()
+
+                self.label_info_arc_angle_value.setText(f"{int(np.degrees(array.arc_angle))}" + "˚")
+                self.label_info_arc_angle.show()
+                self.label_info_arc_angle_value.show()
 
     def update(self, frame):
         time = frame / 10.0
