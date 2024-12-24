@@ -1,9 +1,9 @@
 import numpy as np
 
 class Array():
-    def __init__(self, name, array_type, num_elements, frequencies, steering_angle, position, X, Y, beam_profile_x, beam_profile_y,
+    def __init__(self, name, array_type, num_elements, frequencies, steering_angle, position, meshgird_x, meshgrid_y, beam_profile_x, beam_profile_y,
                   element_spacing = None, radius = None, arc_angle = None):
-        self.start_array(name, array_type, num_elements, frequencies, steering_angle, position, X, Y, beam_profile_x, beam_profile_y,
+        self.start_array(name, array_type, num_elements, frequencies, steering_angle, position, meshgird_x, meshgrid_y, beam_profile_x, beam_profile_y,
                           element_spacing, radius, arc_angle)
 
     def start_array(self, name,  array_type, number_of_elements, frequencies, steering_angle, position, X, Y, beam_profile_x, beam_profile_y,
@@ -19,7 +19,7 @@ class Array():
         self.array_type = array_type
         self.wavelengths = [1.0 / x if x != 0 else 1.0 /(x+ 1e-12) for x in self.frequencies]
         if array_type == "Linear":
-            ahmed = [
+            phased_array = [
                 {
                     "type": "linear",
                     "num_elements": self.number_of_elements,
@@ -30,7 +30,7 @@ class Array():
                     "position": self.position,
                 }]
         elif array_type == "Curved":
-            ahmed = [
+            phased_array = [
             {
                 "type": "curved",
                 "num_elements": self.number_of_elements,
@@ -44,7 +44,7 @@ class Array():
                 ]
 
         self.array_data = {}
-        for array in ahmed:
+        for array in phased_array:
             self.number_of_elements = array["num_elements"]
             self.wavelengths = array["wavelengths"]
             self.frequencies = array["frequencies"]
