@@ -215,27 +215,36 @@ class ui(object):
         self.label_info_number_of_transmiter_value = QLabel("………")
         grid_of_array_info.addWidget(self.label_info_number_of_transmiter, 3, 0)
         grid_of_array_info.addWidget(self.label_info_number_of_transmiter_value, 3, 1)
-
-        self.label_info_frequencies = QLabel("Frequencies") 
-        self.label_info_frequencies_value = QLabel("………")
-        grid_of_array_info.addWidget(self.label_info_frequencies, 4, 0)
-        grid_of_array_info.addWidget(self.label_info_frequencies_value, 4, 1)
-
+        
         self.label_info_elements_spacing = QLabel("Elements Spacing") 
         self.label_info_elements_spacing_value = QLabel("………")
-        grid_of_array_info.addWidget(self.label_info_elements_spacing, 5, 0)
-        grid_of_array_info.addWidget(self.label_info_elements_spacing_value, 5, 1)
+        grid_of_array_info.addWidget(self.label_info_elements_spacing, 4, 0)
+        grid_of_array_info.addWidget(self.label_info_elements_spacing_value, 4, 1) 
+        
+        self.label_info_frequencies = QLabel("Frequencies") 
+        self.label_info_frequencies_value = QLabel("………")
+        grid_of_array_info.addWidget(self.label_info_frequencies, 5, 0)
+        grid_of_array_info.addWidget(self.label_info_frequencies_value, 5, 1)
+
+        self.label_info_positoin = QLabel("Postion") 
+        self.label_info_positoin_value = QLabel("………")
+        grid_of_array_info.addWidget(self.label_info_positoin, 6, 0)
+        grid_of_array_info.addWidget(self.label_info_positoin_value, 6, 1)
+
+        self.label_info_steering_angle = QLabel("Steering Angle") 
+        self.label_info_steering_angle_value = QLabel("………")
+        grid_of_array_info.addWidget(self.label_info_steering_angle, 7, 0)
+        grid_of_array_info.addWidget(self.label_info_steering_angle_value, 7, 1)
 
         self.label_info_raduis = QLabel("Raduis")
         self.label_info_raduis_value = QLabel("………")
-        grid_of_array_info.addWidget(self.label_info_raduis, 6, 0)
-        grid_of_array_info.addWidget(self.label_info_raduis_value, 6, 1)
+        grid_of_array_info.addWidget(self.label_info_raduis, 8, 0)
+        grid_of_array_info.addWidget(self.label_info_raduis_value, 8, 1)
         
-
         self.label_info_arc_angle = QLabel("Arc Angle : ")
         self.label_info_arc_angle_value = QLabel("………")
-        grid_of_array_info.addWidget(self.label_info_arc_angle, 7, 0)
-        grid_of_array_info.addWidget(self.label_info_arc_angle_value, 7, 1)
+        grid_of_array_info.addWidget(self.label_info_arc_angle, 9, 0)
+        grid_of_array_info.addWidget(self.label_info_arc_angle_value, 9, 1)
 
         grid_layout_of_output.addLayout(grid_of_array_info, 1, 0)
 
