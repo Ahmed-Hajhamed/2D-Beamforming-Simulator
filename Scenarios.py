@@ -2,6 +2,7 @@ from PhasedArray import Array
 from Receiver import Receiver
 arrays_scenarios = {}
 receivers_scenarios = {}
+steering_angle_increment_of_ultrasound = 5
 
 def tumor_ablation(meshgrid_x, meshgrid_y, beam_profile_x, beam_profile_y):
     arrays_scenarios.clear()
