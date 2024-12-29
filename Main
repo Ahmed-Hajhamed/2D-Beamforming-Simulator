@@ -9,7 +9,7 @@ from Receiver import Receiver
 import Scenarios
 import UI
 import matplotlib.pyplot as plt
-import Scenarios
+from Scenarios import arrays_scenarios, receivers_scenarios, five_G, tumor_ablation, ultrasound
 
 class Main(QMainWindow, UI.ui):
     def __init__(self):
@@ -57,23 +57,23 @@ class Main(QMainWindow, UI.ui):
         scenario = self.combo_box_of_senario.currentText()
         self.remove_scenario()
         if scenario == "5G":
-            Scenarios.five_G(self.meshgrid_x, self.meshgrid_y, self.beam_profile_x, self.beam_profile_y)
+            five_G(self.meshgrid_x, self.meshgrid_y, self.beam_profile_x, self.beam_profile_y)
         
         elif scenario == "Ultrasound":
-            Scenarios.ultrasound(self.meshgrid_x, self.meshgrid_y, self.beam_profile_x, self.beam_profile_y)
+            ultrasound(self.meshgrid_x, self.meshgrid_y, self.beam_profile_x, self.beam_profile_y)
 
         elif scenario == "Tumor Ablation":
-            Scenarios.tumor_ablation(self.meshgrid_x, self.meshgrid_y, self.beam_profile_x, self.beam_profile_y)
+            tumor_ablation(self.meshgrid_x, self.meshgrid_y, self.beam_profile_x, self.beam_profile_y)
         
-        self.arrays.update(Scenarios.arrays_scenarios)
-        arrays_name = [k for k in Scenarios.arrays_scenarios.keys()]
+        self.arrays.update(arrays_scenarios)
+        arrays_name = [k for k in arrays_scenarios.keys()]
         self.current_arrays_combo_box.addItems(arrays_name)
         self.array_info_combobox.addItems(arrays_name)
         self.current_arrays_combo_box.setCurrentText(arrays_name[-1])
         self.array_info_combobox.setCurrentText(arrays_name[-1])
         
-        receivers_names = [k for k in Scenarios.receivers_scenarios.keys()]
-        self.receivers_.update(Scenarios.receivers_scenarios)
+        receivers_names = [k for k in receivers_scenarios.keys()]
+        self.receivers_.update(receivers_scenarios)
         self.current_recivers_combo_box.addItems(receivers_names)
         self.current_recivers_combo_box.setCurrentText(receivers_names[-1])
         self.change_current_receiver()
@@ -81,6 +81,12 @@ class Main(QMainWindow, UI.ui):
         self.draw_arrays_and_receivers()
 
     def remove_scenario(self):
+        # for array_name in arrays_scenarios.keys():
+        #     self.remove_array(array_name)
+
+        # for receiver in receivers_scenarios.keys():
+        #     self.remove_receiver(receiver)
+        
         arrays = [array for array in self.arrays.keys()]
         receivers = [receiver for receiver in self.receivers_]
         for array in arrays:
@@ -114,8 +120,7 @@ class Main(QMainWindow, UI.ui):
 
             if self.current_arrays_combo_box.currentText() in self.arrays:
                 old_name = self.current_array.name
-
-                self.current_array.update_array(name, array_type, number_of_elements, frequencies, steering_angle, 
+                self.current_array.start_array(name, array_type, number_of_elements, frequencies, steering_angle, 
                     position, self.meshgrid_x, self.meshgrid_y, self.beam_profile_x, self.beam_profile_y,
                     element_spacing= elements_spacing)
             else:
@@ -130,7 +135,7 @@ class Main(QMainWindow, UI.ui):
           
             if self.current_arrays_combo_box.currentText() in self.arrays:
                 old_name = self.current_array.name
-                self.current_array.update_array(name, array_type, number_of_elements, frequencies, steering_angle, position, self.meshgrid_x, 
+                self.current_array.start_array(name, array_type, number_of_elements, frequencies, steering_angle, position, self.meshgrid_x, 
                                             self.meshgrid_y, self.beam_profile_x, self.beam_profile_y, element_spacing= None, radius= radius, 
                                             arc_angle= arc_angle)
             else:
@@ -313,13 +318,6 @@ class Main(QMainWindow, UI.ui):
         resultant_wave = np.zeros_like(self.meshgrid_x)
         beam_profile_amplitude = np.zeros_like(self.beam_profile_x)
         receiver_signals = []
-        if self.current_arrays_combo_box.currentText() == "Transducer":
-            self.arrays["Transducer"].steering_angle += Scenarios.steering_angle_increment_of_ultrasound
-            self.arrays["Transducer"].update_steerign_angle()
-            
-            if self.arrays["Transducer"].steering_angle > 60 or self.arrays["Transducer"].steering_angle < -60:
-                Scenarios.steering_angle_increment_of_ultrasound = -1*Scenarios.steering_angle_increment_of_ultrasound
-
 
         for array in self.arrays.values():
             positions = array.array_data["positions"]
@@ -329,6 +327,12 @@ class Main(QMainWindow, UI.ui):
             frequencies = array.array_data["frequencies"]
             wavelengths = array.array_data["wavelengths"]
             steering_angle = array.array_data["steering_angle"]
+
+            if array.name == "Transducer":
+                array.steering_angle = array.steering_angle + Scenarios.steering_angle_increment_of_ultrasound
+                if array.steering_angle > 40 or array.steering_angle < -40:
+                    Scenarios.steering_angle_increment_of_ultrasound *= -1
+                array.update_steering_angle()
 
             for r, beam_r, phi in zip(distances, beam_distances, phase_shifts):
                 for freq, wavelength in zip(frequencies, wavelengths):
