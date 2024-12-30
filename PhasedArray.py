@@ -90,15 +90,3 @@ class Array():
                 "wavelengths": self.wavelengths,
                 "steering_angle": self.steering_angle,
             }
-    def update_steering_angle(self):
-        source_positions = self.array_data["positions"]
-        self.phase_shifts = [
-                [
-                    2 * np.pi / wavelength * pos[0] * np.sin(self.steering_angle)
-                    + 2 * np.pi / wavelength * pos[1] * np.cos(self.steering_angle)
-                    for wavelength in self.wavelengths
-                ]
-                for pos in source_positions
-            ]
-        self.array_data["phase_shifts"] = self.phase_shifts
-        self.array_data["steering_angle"] = self.steering_angle
