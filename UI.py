@@ -131,6 +131,7 @@ class ui(object):
         hide_layout(self.h_layout_of_Radius)
 
         self.slider_of_arc_angle = slider_creator(Maximum=120, Minimum=-120)
+        self.slider_of_arc_angle.setValue(120)
         self.label_arc_angle= create_label("Arc Angle")
         self.label_arc_angle_value = create_label(str(self.slider_of_arc_angle.value())+"˚")
         self.h_layout_of_arc_angle = create_layout_of_parameter(self.label_arc_angle, self.slider_of_arc_angle, self.label_arc_angle_value)

@@ -248,7 +248,7 @@ class Main(QMainWindow, UI.ui):
         self.current_arrays_combo_box.setCurrentIndex(0)
         self.slider_of_transmiters_number.setValue(8)
         self.slider_of_element_spacing.setValue(1)
-        self.slider_of_arc_angle.setValue(0)
+        self.slider_of_arc_angle.setValue(120)
         self.slider_of_steering_angle.setValue(0)
         self.radius_line_edit.clear()
         self.array_name_line_edit.clear()
