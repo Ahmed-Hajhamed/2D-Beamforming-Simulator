@@ -21,8 +21,8 @@ class Main(QMainWindow, UI.ui):
         y = np.linspace( 0, 40, 100)
         self.meshgrid_x, self.meshgrid_y = np.meshgrid(x, y) 
         self.meshgrid = np.array([self.meshgrid_x, self.meshgrid_y])
-        self.save_button.clicked.connect(self.add_update_array)
-        self.button_of_add_new_array.clicked.connect(self.clear_array_inputs)
+        self.button_of_add_new_array.clicked.connect(self.save_update)
+        self.save_button.clicked.connect(self.add_array)
         self.button_of_add_new_reciver.clicked.connect(self.clear_receiver_inputs)
         self.save_button_of_reciver.clicked.connect(self.add_update_receiver)
         self.remove_array_button.clicked.connect(self.remove_array)
@@ -30,7 +30,6 @@ class Main(QMainWindow, UI.ui):
         self.current_arrays_combo_box.currentTextChanged.connect(self.change_current_array)
         self.current_recivers_combo_box.currentTextChanged.connect(self.change_current_receiver)
         self.array_info_combobox.currentTextChanged.connect(self.display_array_info)
-        self.button_of_add_new_array.clicked.connect(self.clear_array_inputs)
         self.button_of_add_new_reciver.clicked.connect(self.clear_receiver_inputs)
         self.applay_the_senario.clicked.connect(self.set_scenario)
         self.beam_profile_x = np.linspace(-20, 20, 500)
@@ -46,12 +45,48 @@ class Main(QMainWindow, UI.ui):
         self.update_cheaker = 0
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_all)  
-        self.timer.start(1000) 
+        self.timer.start(1000)
         self.angles = np.linspace(0, 2 * np.pi, 360)
         self.polar_power = np.zeros_like(self.angles)
         contour = self.heat_map.axes.contourf(self.meshgrid_x, self.meshgrid_y,
                                                np.zeros_like(self.meshgrid_x), levels=100, cmap='RdBu')  
-        plt.colorbar(contour, ax=self.heat_map.axes, label='Amplitude')
+        self.color_bar = plt.colorbar(contour, ax=self.heat_map.axes, label='Amplitude')
+
+
+    def save_update(self):
+        if self.button_of_add_new_array.text() == "Add Array":
+            self.button_of_add_new_array.setText("real time")
+            self.radio_button_of_linear.setEnabled(False)
+            self.radio_button_of_curve.setEnabled(False)
+            self.save_button.setVisible(False)
+            self.remove_array_button.setVisible(False)
+            self.array_name_line_edit.setVisible(False)
+            self.label_of_array_name.setVisible(False)
+            self.slider_of_transmiters_number.sliderReleased.connect(self.update_array)
+            self.slider_of_element_spacing.sliderReleased.connect(self.update_array)
+            self.slider_of_steering_angle.sliderReleased.connect(self.update_array)
+            self.slider_of_arc_angle.sliderReleased.connect(self.update_array)
+            self.frequencies_line_edit.returnPressed.connect(self.update_array)
+            self.array_position_x_line_edit.returnPressed.connect(self.update_array)
+            self.array_position_y_line_edit.returnPressed.connect(self.update_array)
+            self.radius_line_edit.returnPressed.connect(self.update_array)
+            self.clear_array_inputs()
+        else:
+            self.button_of_add_new_array.setText("Add Array")
+            self.slider_of_transmiters_number.sliderReleased.disconnect(self.update_array)
+            self.slider_of_element_spacing.sliderReleased.disconnect(self.update_array)
+            self.slider_of_steering_angle.sliderReleased.disconnect(self.update_array)
+            self.slider_of_arc_angle.sliderReleased.disconnect(self.update_array)
+            self.frequencies_line_edit.returnPressed.disconnect(self.update_array)
+            self.array_position_x_line_edit.returnPressed.disconnect(self.update_array)
+            self.array_position_y_line_edit.returnPressed.disconnect(self.update_array)
+            self.radius_line_edit.returnPressed.disconnect(self.update_array)
+            self.radio_button_of_linear.setEnabled(True)
+            self.radio_button_of_curve.setEnabled(True)
+            self.save_button.setVisible(True)
+            self.remove_array_button.setVisible(True)
+            self.array_name_line_edit.setVisible(True)
+            self.label_of_array_name.setVisible(True)
 
     def set_scenario(self):
         scenario = self.combo_box_of_senario.currentText()
@@ -81,11 +116,6 @@ class Main(QMainWindow, UI.ui):
         self.draw_arrays_and_receivers()
 
     def remove_scenario(self):
-        # for array_name in arrays_scenarios.keys():
-        #     self.remove_array(array_name)
-
-        # for receiver in receivers_scenarios.keys():
-        #     self.remove_receiver(receiver)
         
         arrays = [array for array in self.arrays.keys()]
         receivers = [receiver for receiver in self.receivers_]
@@ -100,7 +130,7 @@ class Main(QMainWindow, UI.ui):
             self.update(self.frame)
             self.frame = (self.frame + 1) % self.max_frames
 
-    def add_update_array(self):
+    def add_array(self):
         name = self.array_name_line_edit.text()
         number_of_elements = self.slider_of_transmiters_number.value()
         frequencies_text = self.frequencies_line_edit.text().strip()
@@ -132,7 +162,7 @@ class Main(QMainWindow, UI.ui):
             array_type = "Curved"
             arc_angle = self.slider_of_arc_angle.value()
             radius = int(self.radius_line_edit.text())
-          
+        
             if self.current_arrays_combo_box.currentText() in self.arrays:
                 old_name = self.current_array.name
                 self.current_array.start_array(name, array_type, number_of_elements, frequencies, steering_angle, position, self.meshgrid_x, 
@@ -142,7 +172,7 @@ class Main(QMainWindow, UI.ui):
                 new_array = Array(name, array_type, number_of_elements, frequencies, steering_angle, position, self.meshgrid_x, 
                                             self.meshgrid_y, self.beam_profile_x, self.beam_profile_y, element_spacing= None, radius= radius, 
                                             arc_angle= arc_angle)
-                
+        
         self.current_arrays_combo_box.addItem(name)
         self.array_info_combobox.addItem(name)
         if self.current_arrays_combo_box.currentText() in self.arrays:
@@ -155,6 +185,40 @@ class Main(QMainWindow, UI.ui):
         self.current_arrays_combo_box.setCurrentText(name)
         self.array_info_combobox.setCurrentText(name)
         self.change_current_array()
+        self.draw_arrays_and_receivers()
+        self.display_array_info()
+
+    def update_array(self):
+        number_of_elements = self.slider_of_transmiters_number.value()
+        frequencies_text = self.frequencies_line_edit.text().strip()
+        frequencies_text = (frequencies_text[:-1] if frequencies_text[-1] == "," else frequencies_text) if len(frequencies_text) >0 else "1"
+        frequencies_text = frequencies_text.split(",")
+        frequencies = []
+        steering_angle = self.slider_of_steering_angle.value() 
+
+        for i in range (len(frequencies_text)):
+            frequencies.append(int(frequencies_text[i]))
+
+        pos_x = int(self.array_position_x_line_edit.text()) if len(self.array_position_x_line_edit.text()) > 0 else  0 
+        pos_y = int(self.array_position_y_line_edit.text()) if len(self.array_position_y_line_edit.text()) > 0 else  0
+        position = [pos_x, pos_y]
+
+        if self.radio_button_of_linear.isChecked():
+            array_type = "Linear"
+            elements_spacing = self.slider_of_element_spacing.value() * 0.5
+            arc_angle = None
+            radius = None
+        else:
+            array_type = "Curved"
+            elements_spacing = None
+            arc_angle = self.slider_of_arc_angle.value()
+            radius = int(self.radius_line_edit.text())
+        
+        name = self.current_array.name
+        self.current_array.start_array(name, array_type, number_of_elements, frequencies, steering_angle, 
+            position, self.meshgrid_x, self.meshgrid_y, self.beam_profile_x, self.beam_profile_y,
+            element_spacing= elements_spacing, radius= radius, arc_angle=arc_angle)
+
         self.draw_arrays_and_receivers()
         self.display_array_info()
 
@@ -220,7 +284,7 @@ class Main(QMainWindow, UI.ui):
             else:
                 self.radio_button_of_curve.setChecked(True)
                 self.radius_line_edit.setText(str(self.current_array.radius))
-                self.slider_of_arc_angle.setValue(int(np.degrees(self.current_array.arc_angle)))
+                self.slider_of_arc_angle.setValue(int(self.current_array.arc_angle))
 
     def remove_array(self, array_name = None):
         if not array_name:
@@ -232,6 +296,7 @@ class Main(QMainWindow, UI.ui):
             self.current_arrays_combo_box.removeItem(self.current_arrays_combo_box.findText(array_name))
             self.array_info_combobox.removeItem(self.array_info_combobox.findText(array_name))
         self.draw_arrays_and_receivers()
+        self.display_array_info()
         self.update(self.frame)
         
     def remove_receiver(self, receiver_name= None):
@@ -245,16 +310,34 @@ class Main(QMainWindow, UI.ui):
         self.draw_arrays_and_receivers()
 
     def clear_array_inputs(self):
-        self.current_arrays_combo_box.setCurrentIndex(0)
-        self.slider_of_transmiters_number.setValue(8)
-        self.slider_of_element_spacing.setValue(1)
-        self.slider_of_arc_angle.setValue(120)
-        self.slider_of_steering_angle.setValue(0)
-        self.radius_line_edit.clear()
-        self.array_name_line_edit.clear()
-        self.frequencies_line_edit.clear()
-        self.array_position_x_line_edit.clear()
-        self.array_position_y_line_edit.clear()
+        if self.current_array is not None: 
+            self.slider_of_transmiters_number.setValue(self.current_array.number_of_elements)
+            if self.current_array.array_type == "Linear":
+                self.slider_of_element_spacing.setValue(int(self.current_array.elements_spacing))
+                self.slider_of_arc_angle.setValue(0)
+                self.radius_line_edit.clear()
+            else: 
+                self.slider_of_element_spacing.setValue(0)
+                self.slider_of_arc_angle.setValue(int(self.current_array.arc_angle))
+                self.radius_line_edit.setText(f"{self.current_array.radius}")
+            frequencies = str(self.current_array.frequencies)
+            self.frequencies_line_edit.setText(frequencies[1:-1])
+            self.array_position_x_line_edit.setText(f"{self.current_array.position[0]}")
+            self.array_position_y_line_edit.setText(f"{self.current_array.position[1]}")
+            
+            self.slider_of_steering_angle.setValue(int(self.current_array.steering_angle))
+
+        else:
+            self.current_arrays_combo_box.setCurrentIndex(0)
+            self.slider_of_transmiters_number.setValue(8)
+            self.slider_of_element_spacing.setValue(1)
+            self.slider_of_arc_angle.setValue(0)
+            self.slider_of_steering_angle.setValue(0)
+            self.radius_line_edit.clear()
+            self.array_name_line_edit.clear()
+            self.frequencies_line_edit.clear()
+            self.array_position_x_line_edit.clear()
+            self.array_position_y_line_edit.clear()
     
     def clear_receiver_inputs(self):
         self.current_recivers_combo_box.setCurrentIndex(0)
@@ -271,6 +354,8 @@ class Main(QMainWindow, UI.ui):
             self.reciver_position_y.setText(str(self.current_receiver.position[1]))
 
     def display_array_info(self):
+        if len(self.array_info_combobox) == 0:
+            pass
         if self.array_info_combobox.currentText() in self.arrays:
             array = self.arrays[self.array_info_combobox.currentText()]
 
@@ -349,7 +434,7 @@ class Main(QMainWindow, UI.ui):
                         positions[:, 0] * np.cos(theta - steering_angle) +
                         positions[:, 1] * np.sin(theta - steering_angle)
                     ))
-                    if self.update_cheaker != len(self.arrays):
+                    if self.update_cheaker != len(self.arrays) or True:
                         self.polar_power[theta_idx] += np.abs(np.sum(steering_vector))**2
         for rx in self.receivers_positions:
             signal = 0
@@ -363,10 +448,15 @@ class Main(QMainWindow, UI.ui):
 
         for c in self.heat_map.axes.collections:
             c.remove()
-        self.heat_map.axes.contourf(self.meshgrid_x, self.meshgrid_y, resultant_wave, levels=100, cmap='RdBu')
+        countour = self.heat_map.axes.contourf(self.meshgrid_x, self.meshgrid_y, resultant_wave, levels=100, cmap='RdBu')
+
+        self.color_bar.mappable.set_clim(vmin=resultant_wave.min(), vmax=resultant_wave.max())
         self.heat_map.draw()
 
-        if self.update_cheaker != len(self.arrays):
+        if self.update_cheaker != len(self.arrays) or True:
+            self.color_bar.set_ticks(np.linspace(resultant_wave.min(), resultant_wave.max(), num=5))
+            self.color_bar.update_normal(countour)
+            self.heat_map.draw()
             self.update_cheaker = len(self.arrays)
             if len(self.arrays) > 0:
                 polar_power_db = 10 * np.log10(self.polar_power / np.max(self.polar_power) + 1e-10)
