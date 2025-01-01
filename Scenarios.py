@@ -7,13 +7,13 @@ steering_angle_increment_of_ultrasound = 5
 def tumor_ablation(meshgrid_x, meshgrid_y, beam_profile_x, beam_profile_y):
     arrays_scenarios.clear()
     receivers_scenarios.clear()
-    buttom_array = Array("Buttom Array", "Linear", 8, [1], 0, [0, 0], 
+    buttom_array = Array("Buttom Array", "Linear", 8, [1], 0, [0, 10], 
                          meshgrid_x, meshgrid_y, beam_profile_x, beam_profile_y, 0.5, radius= None, arc_angle= None)
-    top_array = Array("Top Array", "Linear", 8, [1], 180, [0, 8], 
+    top_array = Array("Top Array", "Linear", 8, [1], 180, [0, 18], 
                          meshgrid_x, meshgrid_y, beam_profile_x, beam_profile_y, 0.5, radius= None, arc_angle= None)
-    left_array = Array("Left Array", "Linear", 8, [1], 90, [-8, 4], 
+    left_array = Array("Left Array", "Linear", 8, [1], 90, [-8, 14], 
                          meshgrid_x, meshgrid_y, beam_profile_x, beam_profile_y, 0.5, radius= None, arc_angle= None)
-    right_array = Array("Right Array", "Linear", 8, [1], -90, [8, 4], 
+    right_array = Array("Right Array", "Linear", 8, [1], -90, [8, 14], 
                          meshgrid_x, meshgrid_y, beam_profile_x, beam_profile_y, 0.5, radius= None, arc_angle= None)
     tumor_receiver = Receiver("Tumor", [0, 4])
     arrays_scenarios["Buttom Array"] = buttom_array
@@ -39,4 +39,3 @@ def five_G(meshgrid_x, meshgrid_y, beam_profile_x, beam_profile_y):
     receivers_scenarios["Receiver_1"] = Receiver("Receiver_1", [-8, 8])
     receivers_scenarios["Receiver_2"] = Receiver("Receiver_2", [8, 8])
     arrays_scenarios["Sender Array"] = sender_array
-

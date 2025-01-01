@@ -6,6 +6,7 @@ from PyQt5.QtGui import QIntValidator
 from PyQt5.QtCore import Qt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 import numpy as np
 gray_style = {
     'axes.facecolor': '2E2E2E',    # Dark gray background for axes
@@ -23,7 +24,13 @@ gray_style = {
     'legend.edgecolor': 'white',    # White edges for legends
 }
 plt.style.use(gray_style)
-
+class SpectrogramPlot(FigureCanvas):
+    def __init__(self, width=5, height=4, dpi=100):
+        fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = fig.add_subplot(111)
+        self.no_label = True 
+        self.vmin, self.vmax= 0, 0
+        super().__init__(fig)
 class beam_Plot(FigureCanvas):
     def __init__(self, linear = True, parent=None, width=7.5, height=4, dpi=100):
         self.fig = plt.figure(figsize=(width, height), dpi=dpi)
@@ -198,7 +205,8 @@ class ui(object):
         
         self.beam_profile = beam_Plot(linear= False)
         grid_layout_of_output.addWidget(self.beam_profile, 0, 1)
-        
+
+        # self.heat_map = SpectrogramPlot()
         self.heat_map = beam_Plot()
         grid_layout_of_output.addWidget(self.heat_map, 0, 0)
 

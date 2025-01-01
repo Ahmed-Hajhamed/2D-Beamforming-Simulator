@@ -40,12 +40,12 @@ class Main(QMainWindow, UI.ui):
         self.current_receiver = None
         self.receiver_texts = []
         self.receivers_positions = []
-        self.frame = 10
+        self.frame = 100
         self.max_frames = 100 
         self.update_cheaker = 0
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.update_all)  
-        self.timer.start(1000)
+        # self.timer = QTimer()
+        # self.timer.timeout.connect(self.update_all)  
+        # self.timer.start(1000)
         self.angles = np.linspace(0, 2 * np.pi, 360)
         self.polar_power = np.zeros_like(self.angles)
         contour = self.heat_map.axes.contourf(self.meshgrid_x, self.meshgrid_y,
@@ -114,6 +114,7 @@ class Main(QMainWindow, UI.ui):
         self.change_current_receiver()
 
         self.draw_arrays_and_receivers()
+        self.update(self.frame)
 
     def remove_scenario(self):
         
@@ -124,10 +125,11 @@ class Main(QMainWindow, UI.ui):
 
         for receiver in receivers:
             self.remove_receiver(receiver)
+        self.update(self.frame)
 
     def update_all(self):
         if len(self.arrays) > 0:
-            self.update(self.frame)
+            # self.update(self.frame)
             self.frame = (self.frame + 1) % self.max_frames
 
     def add_array(self):
@@ -187,6 +189,7 @@ class Main(QMainWindow, UI.ui):
         self.change_current_array()
         self.draw_arrays_and_receivers()
         self.display_array_info()
+        self.update(self.frame)
 
     def update_array(self):
         number_of_elements = self.slider_of_transmiters_number.value()
@@ -221,6 +224,7 @@ class Main(QMainWindow, UI.ui):
 
         self.draw_arrays_and_receivers()
         self.display_array_info()
+        self.update(self.frame)
 
     def add_update_receiver(self):
         if self.reciver_position_x.text().strip() == ""or self.reciver_position_y.text().strip() == "" or self.reciver_name.text().strip()=="" :
@@ -240,6 +244,7 @@ class Main(QMainWindow, UI.ui):
         self.current_recivers_combo_box.setCurrentText(name)
         self.draw_arrays_and_receivers()
         self.change_current_receiver()
+        self.update(self.frame)
 
     def draw_arrays_and_receivers(self):
         self.transmiters_recivers_plotter.axes.clear()
@@ -448,6 +453,21 @@ class Main(QMainWindow, UI.ui):
 
         for c in self.heat_map.axes.collections:
             c.remove()
+
+        # if self.heat_map.no_label:
+        #     self.heat_map.no_label = False
+        #     self.heat_map.vmin, self.heat_map.vmax = np.min(resultant_wave), np.max(resultant_wave)
+
+        # self.heat_map.axes.clear()
+        # cax = self.heat_map.axes.pcolormesh(self.meshgrid_x, self.meshgrid_y, resultant_wave,
+        #                                      shading='gouraud', cmap='plasma', vmin=self.heat_map.vmin, vmax=self.heat_map.vmax)
+
+        # if not hasattr(self.heat_map, 'colorbar') or self.heat_map.colorbar is None:
+        #     self.heat_map.colorbar = self.heat_map.figure.colorbar(cax, ax=self.heat_map.axes)
+
+        # else:
+        #     self.heat_map.colorbar.update_normal(cax)
+
         res_list = np.arange(resultant_wave.min(), resultant_wave.max()+0.1, 0.1)
         if len(res_list) < 2 :
             res_list = np.arange(-15, 15.1, 0.1) 

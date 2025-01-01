@@ -57,6 +57,10 @@ class Array():
                     np.array([i * element_spacing - (self.number_of_elements - 1) * element_spacing / 2, 0])
                     for i in range(self.number_of_elements)
                 ]
+                self.source_positions_ = [
+                    np.array([i * element_spacing - (self.number_of_elements - 1) * element_spacing / 2, 0])
+                    for i in range(self.number_of_elements)
+                ]
             elif array["type"] == "curved":
                 arc_angle = np.radians(array["arc_angle"])
                 radius = array["radius"]
@@ -64,10 +68,15 @@ class Array():
                 source_positions = [
                     np.array([radius * np.sin(angle), radius * np.cos(angle)]) for angle in angles
                 ]
+                self.source_positions_ = [
+                    np.array([i * 0.5 * self.wavelengths[0] - (self.number_of_elements - 1) * 0.5* self.wavelengths[0] / 2, 0])
+                    for i in range(self.number_of_elements)
+                ]
 
             source_positions = [pos + np.array([center_x, center_y]) for pos in source_positions]
+            self.source_positions_ = [pos + np.array([center_x, center_y]) for pos in self.source_positions_]
             distances = [
-                np.sqrt((X - pos[0])**2 + (Y - pos[1])**2) for pos in source_positions
+                np.sqrt((X - pos[0])**2 + (Y - pos[1])**2) for pos in self.source_positions_
             ]
             beam_distances = [
                 np.sqrt((beam_profile_x - pos[0])**2 + (beam_profile_y - pos[1])**2)
@@ -79,7 +88,7 @@ class Array():
                     + 2 * np.pi / wavelength * pos[1] * np.cos(self.steering_angle)
                     for wavelength in self.wavelengths
                 ]
-                for pos in source_positions
+                for pos in self.source_positions_
             ]
             self.array_data = {
                 "positions": np.array(source_positions),
@@ -89,16 +98,17 @@ class Array():
                 "frequencies": self.frequencies,
                 "wavelengths": self.wavelengths,
                 "steering_angle": self.steering_angle,
+                "unit_placements": np.array(self.source_positions_)
             }
     def update_steering_angle(self):
-        source_positions = self.array_data["positions"]
+        # source_positions = self.array_data["positions"]
         self.phase_shifts = [
                 [
                     2 * np.pi / wavelength * pos[0] * np.sin(self.steering_angle)
                     + 2 * np.pi / wavelength * pos[1] * np.cos(self.steering_angle)
                     for wavelength in self.wavelengths
                 ]
-                for pos in source_positions
+                for pos in self.source_positions_
             ]
         self.array_data["phase_shifts"] = self.phase_shifts
         self.array_data["steering_angle"] = self.steering_angle
