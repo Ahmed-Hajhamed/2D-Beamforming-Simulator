@@ -410,7 +410,7 @@ class Main(QMainWindow, UI.ui):
         receiver_signals = []
 
         for array in self.arrays.values():
-            positions = array.array_data["positions"]
+            positions = array.array_data["unit_placements"]
             distances = array.array_data["distances"]
             beam_distances = array.array_data["beam_distances"]
             phase_shifts = array.array_data["phase_shifts"]
