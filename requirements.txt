@@ -1,0 +1,2 @@
+NumPy Version: 1.24.4
+Matplotlib Version: 3.7.1
