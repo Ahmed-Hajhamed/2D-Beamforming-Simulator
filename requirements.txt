@@ -1,2 +1,4 @@
-NumPy Version: 1.24.4
-Matplotlib Version: 3.7.1
+numpy==2.0.2
+Matplotlib==3.7.1
+PyQt5==5.15.11
+qt_material==2.14
