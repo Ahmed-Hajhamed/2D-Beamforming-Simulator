@@ -43,7 +43,7 @@ This simulator provides an interactive platform to explore beamforming concepts 
 ### Installation
 1. Clone the repository:
    ```sh
-   git clone https://github.com/Ahmed-Hajhamed/Beamforming.git
+   git clone https://github.com/Ahmed-Hajhamed/2D-Beamforming-Simulator
    ```
 2. Install dependencies:
    ```sh
